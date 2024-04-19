@@ -1,4 +1,4 @@
-package com.andreast.taskstodo.screens
+package com.andreast.taskstodo.presentation.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box

@@ -1,4 +1,4 @@
-package com.andreast.taskstodo.screens
+package com.andreast.taskstodo.presentation.screens
 
 const val TASK_ITEM_SCREEN_ROUTE_KEY = "taskId"
 

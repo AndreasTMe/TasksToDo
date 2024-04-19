@@ -1,4 +1,4 @@
-package com.andreast.taskstodo.ui.theme
+package com.andreast.taskstodo.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build

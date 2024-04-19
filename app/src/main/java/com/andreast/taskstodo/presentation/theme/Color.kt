@@ -1,4 +1,4 @@
-package com.andreast.taskstodo.ui.theme
+package com.andreast.taskstodo.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

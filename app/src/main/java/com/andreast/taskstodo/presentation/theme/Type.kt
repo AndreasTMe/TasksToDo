@@ -1,4 +1,4 @@
-package com.andreast.taskstodo.ui.theme
+package com.andreast.taskstodo.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,4 +1,4 @@
-package com.andreast.taskstodo
+package com.andreast.taskstodo.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,11 +9,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.andreast.taskstodo.screens.Screen
-import com.andreast.taskstodo.screens.TASK_ITEM_SCREEN_ROUTE_KEY
-import com.andreast.taskstodo.screens.TaskItemScreen
-import com.andreast.taskstodo.screens.TaskScreen
-import com.andreast.taskstodo.ui.theme.TasksToDoTheme
+import com.andreast.taskstodo.presentation.screens.Screen
+import com.andreast.taskstodo.presentation.screens.TASK_ITEM_SCREEN_ROUTE_KEY
+import com.andreast.taskstodo.presentation.screens.TaskItemScreen
+import com.andreast.taskstodo.presentation.screens.TaskScreen
+import com.andreast.taskstodo.presentation.ui.theme.TasksToDoTheme
 
 class MainActivity : ComponentActivity() {
 

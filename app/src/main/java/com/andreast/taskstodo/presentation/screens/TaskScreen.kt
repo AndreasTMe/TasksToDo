@@ -1,4 +1,4 @@
-package com.andreast.taskstodo.screens
+package com.andreast.taskstodo.presentation.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
