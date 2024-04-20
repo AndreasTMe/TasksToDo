@@ -20,32 +20,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import java.util.UUID
-
-val ID_LIST = listOf(
-    UUID.randomUUID().toString(),
-    UUID.randomUUID().toString(),
-    UUID.randomUUID().toString(),
-    UUID.randomUUID().toString(),
-    UUID.randomUUID().toString(),
-    UUID.randomUUID().toString(),
-    UUID.randomUUID().toString(),
-    UUID.randomUUID().toString(),
-    UUID.randomUUID().toString(),
-    UUID.randomUUID().toString(),
-)
+import com.andreast.taskstodo.application.persistence.IRepository
+import com.andreast.taskstodo.domain.TaskList
+import kotlinx.coroutines.launch
 
 @Composable
 fun TaskScreen(
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    repository: IRepository<TaskList, Int>
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val (taskLists, setTaskLists) = remember { mutableStateOf<List<TaskList>>(listOf()) }
+
     Scaffold(
         content = { padding ->
             Box(
@@ -54,7 +48,11 @@ fun TaskScreen(
                     .padding(padding)
             ) {
                 LazyVerticalGrid(columns = GridCells.Fixed(3)) {
-                    items(10) {
+                    coroutineScope.launch {
+                        setTaskLists(repository.getAll())
+                    }
+
+                    items(taskLists.size) {
                         Column(
                             modifier = Modifier
                                 .aspectRatio(1f)
@@ -70,7 +68,7 @@ fun TaskScreen(
                                 )
                                 .clickable {
                                     navHostController.navigate(
-                                        route = Screen.TaskItemScreen.createRoute(taskId = ID_LIST[it])
+                                        route = Screen.TaskItemScreen.createRoute(taskId = taskLists[it].id.toString())
                                     )
                                 },
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -82,9 +80,8 @@ fun TaskScreen(
                                     .height(50.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                val current = ID_LIST[it]
                                 Text(
-                                    text = "Item $current",
+                                    text = taskLists[it].title,
                                     color = MaterialTheme.colorScheme.inverseSurface,
                                 )
                             }
@@ -107,10 +104,4 @@ fun TaskScreen(
             )
         }
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun TaskScreenPreview() {
-    TaskScreen(navHostController = rememberNavController())
 }
