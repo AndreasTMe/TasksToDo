@@ -4,8 +4,12 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.andreast.taskstodo.infrastructure.persistence.tables.TaskList
+import javax.inject.Inject
 
-class DbHelper(context: Context, factory: SQLiteDatabase.CursorFactory? = null) :
+class DbHelper @Inject constructor(
+    context: Context,
+    factory: SQLiteDatabase.CursorFactory? = null
+) :
     SQLiteOpenHelper(context, DATABASE_NAME, factory, DATABASE_VERSION) {
 
     companion object {

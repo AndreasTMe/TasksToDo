@@ -9,23 +9,25 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.andreast.taskstodo.application.persistence.IDbContext
-import com.andreast.taskstodo.infrastructure.persistence.DbContext
+import com.andreast.taskstodo.application.services.ITaskScreenService
 import com.andreast.taskstodo.presentation.screens.Screen
 import com.andreast.taskstodo.presentation.screens.TASK_ITEM_SCREEN_ROUTE_KEY
 import com.andreast.taskstodo.presentation.screens.TaskItemScreen
 import com.andreast.taskstodo.presentation.screens.TaskScreen
 import com.andreast.taskstodo.presentation.ui.theme.TasksToDoTheme
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private lateinit var _navController: NavHostController
-    private lateinit var _dbContext: IDbContext
+
+    @Inject
+    lateinit var taskScreenService: ITaskScreenService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        _dbContext = DbContext(this)
 
         setContent {
             TasksToDoTheme {
@@ -38,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     composable(
                         route = Screen.TaskScreen.route
                     ) {
-                        TaskScreen(_navController, _dbContext.taskLists)
+                        TaskScreen(taskScreenService, _navController)
                     }
                     composable(
                         route = Screen.TaskItemScreen.route,
@@ -55,10 +57,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    override fun onDestroy() {
-        _dbContext.close()
-        super.onDestroy()
     }
 }

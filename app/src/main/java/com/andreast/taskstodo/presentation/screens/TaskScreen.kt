@@ -28,17 +28,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.andreast.taskstodo.application.persistence.IRepository
-import com.andreast.taskstodo.domain.TaskList
+import com.andreast.taskstodo.application.dto.TaskListDto
+import com.andreast.taskstodo.application.services.ITaskScreenService
 import kotlinx.coroutines.launch
 
 @Composable
 fun TaskScreen(
-    navHostController: NavHostController,
-    repository: IRepository<TaskList, Int>
+    taskScreenService: ITaskScreenService,
+    navHostController: NavHostController
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val (taskLists, setTaskLists) = remember { mutableStateOf<List<TaskList>>(listOf()) }
+    val (taskLists, setTaskLists) = remember { mutableStateOf<List<TaskListDto>>(listOf()) }
 
     Scaffold(
         content = { padding ->
@@ -49,7 +49,7 @@ fun TaskScreen(
             ) {
                 LazyVerticalGrid(columns = GridCells.Fixed(3)) {
                     coroutineScope.launch {
-                        setTaskLists(repository.getAll())
+                        setTaskLists(taskScreenService.getAllTaskLists())
                     }
 
                     items(taskLists.size) {
@@ -81,7 +81,7 @@ fun TaskScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = taskLists[it].title,
+                                    text = taskLists[it].title ?: "Untitled",
                                     color = MaterialTheme.colorScheme.inverseSurface,
                                 )
                             }
