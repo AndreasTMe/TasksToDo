@@ -16,7 +16,7 @@ object TaskListTable {
 data class TaskList(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = TaskListTable.COLUMN_ID)
-    val id: Long,
+    val id: Long = 0,
 
     @ColumnInfo(name = TaskListTable.COLUMN_TITLE)
     val title: String

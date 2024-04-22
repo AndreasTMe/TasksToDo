@@ -21,7 +21,7 @@ object TaskListItemTable {
 data class TaskListItem(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
-    val id: Long,
+    val id: Long = 0,
 
     @ColumnInfo(name = TaskListItemTable.COLUMN_PARENT_ID)
     val parentId: Long?,

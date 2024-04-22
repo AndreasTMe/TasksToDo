@@ -61,7 +61,13 @@ fun TaskItemScreen(
                         },
                         colors = TextFieldDefaults.noBackground(),
                         onValueChange = {
-                            taskList.title = it
+                            setTaskList(
+                                TaskListDto(
+                                    taskList.id,
+                                    it,
+                                    taskList.items
+                                )
+                            )
                         },
                     )
                 }
@@ -95,6 +101,12 @@ fun TaskItemScreen(
         }
     })
     BackHandler {
+        if (taskList.isNew()) {
+            coroutineScope.launch {
+                taskScreenService.insertTaskList(taskList)
+            }
+        }
+
         navHostController.navigate(route = Screen.TaskScreen.route) {
             popUpTo(Screen.TaskScreen.route) {
                 inclusive = true
