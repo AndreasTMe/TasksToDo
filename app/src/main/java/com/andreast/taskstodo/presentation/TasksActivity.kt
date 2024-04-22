@@ -19,7 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class TasksActivity : ComponentActivity() {
 
     private lateinit var _navController: NavHostController
 
@@ -50,6 +50,7 @@ class MainActivity : ComponentActivity() {
                         })
                     ) {
                         TaskItemScreen(
+                            taskScreenService,
                             _navController,
                             it.arguments?.getString(TASK_ITEM_SCREEN_ROUTE_KEY).orEmpty()
                         )

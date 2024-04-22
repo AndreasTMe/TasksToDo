@@ -1,6 +1,7 @@
 package com.andreast.taskstodo.application.dto
 
 data class TaskListDto(
-    val id: Long? = null,
-    val title: String? = null
+    var id: Long = -1,
+    var title: String = "",
+    var items: List<TaskListItemDto> = listOf()
 )

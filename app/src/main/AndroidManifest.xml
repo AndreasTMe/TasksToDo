@@ -15,7 +15,7 @@
         android:theme="@style/Theme.TasksToDo"
         tools:targetApi="31">
         <activity
-            android:name=".presentation.MainActivity"
+            android:name=".presentation.TasksActivity"
             android:exported="true"
             android:theme="@style/Theme.TasksToDo">
             <intent-filter>

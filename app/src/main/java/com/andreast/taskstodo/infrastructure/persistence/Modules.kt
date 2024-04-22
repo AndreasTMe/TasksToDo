@@ -1,29 +1,47 @@
 package com.andreast.taskstodo.infrastructure.persistence
 
 import android.content.Context
-import android.database.sqlite.SQLiteOpenHelper
-import com.andreast.taskstodo.application.persistence.ITaskListRepository
-import com.andreast.taskstodo.infrastructure.persistence.repositories.TaskListRepository
+import androidx.room.Room
+import com.andreast.taskstodo.application.persistence.ITasksRepository
+import com.andreast.taskstodo.infrastructure.persistence.dataaccess.TaskListDao
+import com.andreast.taskstodo.infrastructure.persistence.dataaccess.TaskListItemDao
+import com.andreast.taskstodo.infrastructure.persistence.repositories.TasksRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
-import dagger.hilt.android.qualifiers.ActivityContext
-import dagger.hilt.android.scopes.ActivityScoped
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
-@InstallIn(ActivityComponent::class)
+@InstallIn(SingletonComponent::class)
 object ActivityConfiguration {
 
     @Provides
-    @ActivityScoped
-    fun provideSQLiteOpenHelper(@ActivityContext context: Context): SQLiteOpenHelper {
-        return DbHelper(context)
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): TasksToDoDatabase {
+        return Room.databaseBuilder(
+            context,
+            TasksToDoDatabase::class.java,
+            DATABASE_NAME
+        ).build()
     }
 
     @Provides
-    @ActivityScoped
-    fun provideTaskListRepository(sqLiteOpenHelper: SQLiteOpenHelper): ITaskListRepository {
-        return TaskListRepository(sqLiteOpenHelper)
+    fun provideTaskListDao(database: TasksToDoDatabase): TaskListDao {
+        return database.taskListDao()
+    }
+
+    @Provides
+    fun provideTaskListItemDao(database: TasksToDoDatabase): TaskListItemDao {
+        return database.taskListItemDao()
+    }
+
+    @Provides
+    fun provideTaskListRepository(
+        taskListDao: TaskListDao,
+        taskListItemDao: TaskListItemDao
+    ): ITasksRepository {
+        return TasksRepository(taskListDao, taskListItemDao)
     }
 }

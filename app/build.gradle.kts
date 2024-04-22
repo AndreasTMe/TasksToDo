@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
 
     kotlin("kapt")
-    id("com.google.dagger.hilt.android")
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -73,15 +73,21 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Dagger Hilt
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-compiler:2.51.1")
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.51.1")
-    kaptAndroidTest("com.google.dagger:hilt-compiler:2.51.1")
-    testImplementation("com.google.dagger:hilt-android-testing:2.51.1")
-    kaptTest("com.google.dagger:hilt-compiler:2.51.1")
+    implementation(libs.google.dagger.hilt.android)
+    kapt(libs.google.dagger.hilt.compiler)
+    androidTestImplementation(libs.google.dagger.hilt.android.testing)
+    kaptAndroidTest(libs.google.dagger.hilt.compiler)
+    testImplementation(libs.google.dagger.hilt.android.testing)
+    kaptTest(libs.google.dagger.hilt.compiler)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    annotationProcessor(libs.androidx.room.compiler)
+    kapt(libs.androidx.room.compiler)
+    testImplementation(libs.androidx.room.testing)
 }
 
-// Allow references to generated code
 kapt {
     correctErrorTypes = true
 }
