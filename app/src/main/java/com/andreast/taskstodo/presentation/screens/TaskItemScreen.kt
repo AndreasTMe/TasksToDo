@@ -3,41 +3,44 @@ package com.andreast.taskstodo.presentation.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.andreast.taskstodo.application.dto.TaskListDto
+import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.application.services.ITaskScreenService
+import com.andreast.taskstodo.presentation.components.ClickableArea
+import com.andreast.taskstodo.presentation.components.InputDialog
+import com.andreast.taskstodo.presentation.components.InputField
+import com.andreast.taskstodo.presentation.components.tasks.RecursiveTaskItemRow
 import kotlinx.coroutines.launch
 
 @Composable
 fun TaskItemScreen(
     taskScreenService: ITaskScreenService,
     navHostController: NavHostController,
-    taskId: String = ""
+    taskListId: String = ""
 ) {
     val coroutineScope = rememberCoroutineScope()
     val (taskList, setTaskList) = remember { mutableStateOf(TaskListDto()) }
+
+    val taskListIdParsed = taskListId.toLongOrNull()
+    if (taskListIdParsed != null) {
+        LaunchedEffect(Unit) {
+            coroutineScope.launch {
+                setTaskList(taskScreenService.getTaskListWithItems(taskListIdParsed))
+            }
+        }
+    }
 
     Scaffold(content = { padding ->
         Box(
@@ -51,49 +54,59 @@ fun TaskItemScreen(
                     .padding(16.dp),
             ) {
                 Box {
-                    TextField(
-                        modifier = Modifier.fillMaxWidth(),
+                    InputField(
                         value = taskList.title,
-                        placeholder = {
-                            Text(
-                                text = "Title", fontStyle = FontStyle.Italic
-                            )
-                        },
-                        colors = TextFieldDefaults.noBackground(),
+                        placeholder = "Title",
                         onValueChange = {
-                            setTaskList(
-                                TaskListDto(
-                                    taskList.id,
-                                    it,
-                                    taskList.items
-                                )
-                            )
-                        },
+                            setTaskList(taskList.copy(title = it))
+                        }
                     )
                 }
                 Box {
                     LazyColumn {
-                        coroutineScope.launch {
-                            val taskIdParsed = taskId.toLongOrNull()
-                            if (taskIdParsed != null) {
-                                setTaskList(taskScreenService.getTaskListWithItems(taskIdParsed))
-                            }
+                        items(taskList.items.size) { it ->
+                            RecursiveTaskItemRow(
+                                task = taskList.items[it],
+                                index = it,
+                                onItemChecked = { indexTree ->
+                                    val newTaskList = taskList.copy()
+                                    if (newTaskList.tryUpdateChecked(indexTree)) {
+                                        setTaskList(newTaskList)
+                                    }
+                                }
+                            )
                         }
+                    }
 
-                        items(taskList.items.size) {
-                            Row {
-                                val current = it
+                    if (taskList.items.isEmpty()) {
+                        val isOpen = remember { mutableStateOf(false) }
 
-                                Checkbox(checked = taskList.items[current].isCompleted,
-                                    onCheckedChange = {
-                                        taskList.items[current].isCompleted = it
-                                    })
-                                Text(
-                                    text = "Task $current", style = TextStyle(
-                                        textDecoration = if (taskList.items[current].isCompleted) TextDecoration.LineThrough else TextDecoration.None
-                                    ), modifier = Modifier.align(Alignment.CenterVertically)
-                                )
-                            }
+                        ClickableArea(onAreaClicked = { isOpen.value = true })
+
+                        if (isOpen.value) {
+                            InputDialog(
+                                label = "New Task",
+                                placeholder = "Task to do...",
+                                onDismissRequest = {
+                                    isOpen.value = false
+                                },
+                                onConfirmation = {
+                                    if (it != "") {
+                                        setTaskList(
+                                            taskList.copy(
+                                                items = mutableListOf(
+                                                    TaskListItemDto(
+                                                        title = it,
+                                                        order = 1
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    }
+
+                                    isOpen.value = false
+                                },
+                            )
                         }
                     }
                 }
@@ -101,7 +114,7 @@ fun TaskItemScreen(
         }
     })
     BackHandler {
-        if (taskList.isNew()) {
+        if (taskList.id.toInt() == 0 && taskList.title != "") {
             coroutineScope.launch {
                 taskScreenService.insertTaskList(taskList)
             }
@@ -113,14 +126,4 @@ fun TaskItemScreen(
             }
         }
     }
-}
-
-@Composable
-private fun TextFieldDefaults.noBackground(): TextFieldColors {
-    return this.colors(
-        focusedContainerColor = Color.Transparent,
-        unfocusedContainerColor = Color.Transparent,
-        disabledContainerColor = Color.Transparent,
-        errorContainerColor = Color.Transparent
-    )
 }

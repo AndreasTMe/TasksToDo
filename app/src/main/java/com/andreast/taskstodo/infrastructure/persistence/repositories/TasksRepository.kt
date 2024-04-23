@@ -17,7 +17,10 @@ class TasksRepository @Inject constructor(
     }
 
     override suspend fun getTaskListWithItems(id: Long): TaskListWithItems {
-        return taskListItemDao.getAllByTaskListId(id)
+        return TaskListWithItems(
+            taskList = taskListDao.getById(id),
+            taskListItems = taskListItemDao.getAllByTaskListId(id)
+        )
     }
 
     override suspend fun insertTaskList(

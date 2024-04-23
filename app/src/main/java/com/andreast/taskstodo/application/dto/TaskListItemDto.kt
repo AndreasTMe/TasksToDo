@@ -7,5 +7,5 @@ data class TaskListItemDto(
     var title: String = "",
     var order: Int = 0,
     var isCompleted: Boolean = false,
-    var children: List<TaskListItemDto> = listOf()
+    var children: MutableList<TaskListItemDto> = mutableListOf()
 )

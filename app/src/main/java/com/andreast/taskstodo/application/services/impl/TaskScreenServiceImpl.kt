@@ -48,7 +48,7 @@ class TaskScreenServiceImpl @Inject constructor(
         )
     }
 
-    private fun getTaskListItemsWithoutParent(items: Stream<TaskListItem>): List<TaskListItemDto> {
+    private fun getTaskListItemsWithoutParent(items: Stream<TaskListItem>): MutableList<TaskListItemDto> {
         return items
             .filter {
                 it.parentId == null

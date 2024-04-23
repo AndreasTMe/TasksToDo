@@ -7,14 +7,19 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.andreast.taskstodo.domain.TaskList
 import com.andreast.taskstodo.domain.TaskListItem
-import com.andreast.taskstodo.domain.TaskListTable
-import com.andreast.taskstodo.domain.TaskListWithItems
+import com.andreast.taskstodo.domain.TaskListItemTable
 
 @Dao
 interface TaskListItemDao {
-    @Transaction
-    @Query("SELECT * FROM ${TaskListTable.NAME} WHERE ${TaskListTable.COLUMN_ID} = :id LIMIT 1")
-    suspend fun getAllByTaskListId(id: Long): TaskListWithItems
+    @Query(
+        """
+        SELECT *
+        FROM ${TaskListItemTable.NAME}
+        WHERE ${TaskListItemTable.COLUMN_TASK_LIST_ID} = :id
+        ORDER BY '${TaskListItemTable.COLUMN_ORDER}' ASC
+        """
+    )
+    suspend fun getAllByTaskListId(id: Long): List<TaskListItem>
 
     @Transaction
     @Insert(onConflict = OnConflictStrategy.ABORT)
