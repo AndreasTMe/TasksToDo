@@ -7,12 +7,9 @@ sealed class Screen(val route: String) {
     data object TaskItemScreen : Screen(
         route = "task_item_screen?id={$TASK_ITEM_SCREEN_ROUTE_KEY}"
     ) {
-        fun createRoute(taskId: String = ""): String {
-            if (taskId.isNotEmpty()) {
-                return route.replace("{$TASK_ITEM_SCREEN_ROUTE_KEY}", taskId)
-            }
-
-            return route.split("?")[0]
+        fun createRoute(taskId: String): String {
+            assert(taskId.isNotEmpty())
+            return route.replace("{$TASK_ITEM_SCREEN_ROUTE_KEY}", taskId)
         }
     }
 }

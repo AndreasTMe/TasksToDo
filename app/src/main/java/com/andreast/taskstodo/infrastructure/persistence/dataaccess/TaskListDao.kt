@@ -1,8 +1,8 @@
 package com.andreast.taskstodo.infrastructure.persistence.dataaccess
 
 import androidx.room.Dao
-import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Upsert
 import com.andreast.taskstodo.domain.TaskList
 import com.andreast.taskstodo.domain.TaskListTable
 
@@ -14,6 +14,9 @@ interface TaskListDao {
     @Query("SELECT * FROM ${TaskListTable.NAME} WHERE ${TaskListTable.COLUMN_ID} = :id LIMIT 1")
     suspend fun getById(id: Long): TaskList
 
-    @Insert
-    suspend fun insert(taskList: TaskList): Long
+    @Query("SELECT EXISTS(SELECT * FROM ${TaskListTable.NAME} WHERE ${TaskListTable.COLUMN_ID} = :id)")
+    suspend fun exists(id: Long): Boolean
+
+    @Upsert
+    suspend fun upsert(taskList: TaskList): Long
 }

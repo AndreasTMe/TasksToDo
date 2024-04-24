@@ -42,9 +42,15 @@ class TaskScreenServiceImpl @Inject constructor(
         return taskListDto
     }
 
-    override suspend fun insertTaskList(taskList: TaskListDto) {
-        repository.insertTaskList(
+    override suspend fun upsertTaskList(taskList: TaskListDto): Long {
+        return repository.upsertTaskList(
             TaskListMappers.dtoToEntity(taskList)
+        )
+    }
+
+    override suspend fun upsertTaskListItem(taskListItem: TaskListItemDto): Long {
+        return repository.upsertTaskListItem(
+            TaskListItemMappers.dtoToEntity(taskListItem)
         )
     }
 

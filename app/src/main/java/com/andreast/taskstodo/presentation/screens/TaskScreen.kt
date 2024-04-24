@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.andreast.taskstodo.application.dto.TaskListDto
 import com.andreast.taskstodo.application.services.ITaskScreenService
+import com.andreast.taskstodo.presentation.components.InputDialog
 import kotlinx.coroutines.launch
 
 @Composable
@@ -91,17 +92,40 @@ fun TaskScreen(
             }
         },
         floatingActionButton = {
+            val isOpen = remember { mutableStateOf(false) }
+
             FloatingActionButton(
                 containerColor = MaterialTheme.colorScheme.primary,
                 content = {
-                    Icon(Icons.Filled.Add, contentDescription = "Add Task")
+                    Icon(Icons.Filled.Add, contentDescription = "Add Task List")
                 },
                 onClick = {
-                    navHostController.navigate(
-                        route = Screen.TaskItemScreen.createRoute()
-                    )
+                    isOpen.value = !isOpen.value
                 }
             )
+
+            if (isOpen.value) {
+                InputDialog(
+                    label = "New List",
+                    placeholder = "Title",
+                    onDismissRequest = {
+                        isOpen.value = false
+                    },
+                    onConfirmation = {
+                        if (it != "") {
+                            coroutineScope.launch {
+                                val taskListId = taskScreenService.upsertTaskList(TaskListDto(title = it))
+
+                                navHostController.navigate(
+                                    route = Screen.TaskItemScreen.createRoute(taskListId.toString())
+                                )
+                            }
+                        }
+
+                        isOpen.value = false
+                    },
+                )
+            }
         }
     )
 }

@@ -28,17 +28,14 @@ import kotlinx.coroutines.launch
 fun TaskItemScreen(
     taskScreenService: ITaskScreenService,
     navHostController: NavHostController,
-    taskListId: String = ""
+    taskListId: Long
 ) {
     val coroutineScope = rememberCoroutineScope()
     val (taskList, setTaskList) = remember { mutableStateOf(TaskListDto()) }
 
-    val taskListIdParsed = taskListId.toLongOrNull()
-    if (taskListIdParsed != null) {
-        LaunchedEffect(Unit) {
-            coroutineScope.launch {
-                setTaskList(taskScreenService.getTaskListWithItems(taskListIdParsed))
-            }
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            setTaskList(taskScreenService.getTaskListWithItems(taskListId))
         }
     }
 
@@ -59,6 +56,13 @@ fun TaskItemScreen(
                         placeholder = "Title",
                         onValueChange = {
                             setTaskList(taskList.copy(title = it))
+                        },
+                        onFocusChange = { state, valueChanged ->
+                            if (!state.hasFocus && valueChanged) {
+                                coroutineScope.launch {
+                                    taskScreenService.upsertTaskList(taskList)
+                                }
+                            }
                         }
                     )
                 }
@@ -86,25 +90,36 @@ fun TaskItemScreen(
                         if (isOpen.value) {
                             InputDialog(
                                 label = "New Task",
-                                placeholder = "Task to do...",
+                                placeholder = "Do the thing...",
                                 onDismissRequest = {
                                     isOpen.value = false
                                 },
                                 onConfirmation = {
-                                    if (it != "") {
-                                        setTaskList(
-                                            taskList.copy(
-                                                items = mutableListOf(
-                                                    TaskListItemDto(
-                                                        title = it,
-                                                        order = 1
-                                                    )
-                                                )
-                                            )
-                                        )
+                                    if (it == "") {
+                                        isOpen.value = false
+                                        return@InputDialog
                                     }
 
-                                    isOpen.value = false
+                                    val newTaskListItem = TaskListItemDto(
+                                        title = it,
+                                        taskListId = taskListId,
+                                        order = 1
+                                    )
+
+                                    coroutineScope.launch {
+                                        val id =
+                                            taskScreenService.upsertTaskListItem(newTaskListItem)
+
+                                        if (id > 0) {
+                                            setTaskList(
+                                                taskList.copy(
+                                                    items = mutableListOf(newTaskListItem)
+                                                )
+                                            )
+                                        }
+
+                                        isOpen.value = false
+                                    }
                                 },
                             )
                         }
@@ -114,12 +129,6 @@ fun TaskItemScreen(
         }
     })
     BackHandler {
-        if (taskList.id.toInt() == 0 && taskList.title != "") {
-            coroutineScope.launch {
-                taskScreenService.insertTaskList(taskList)
-            }
-        }
-
         navHostController.navigate(route = Screen.TaskScreen.route) {
             popUpTo(Screen.TaskScreen.route) {
                 inclusive = true

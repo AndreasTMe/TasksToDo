@@ -17,20 +17,21 @@ class TasksRepository @Inject constructor(
     }
 
     override suspend fun getTaskListWithItems(id: Long): TaskListWithItems {
-        return TaskListWithItems(
-            taskList = taskListDao.getById(id),
-            taskListItems = taskListItemDao.getAllByTaskListId(id)
-        )
+        val taskList = taskListDao.getById(id)
+        val taskListItems = taskListItemDao.getAllByTaskListId(id)
+
+        return TaskListWithItems(taskList, taskListItems)
     }
 
-    override suspend fun insertTaskList(
-        taskList: TaskList,
-        taskListItems: List<TaskListItem>
-    ) {
-        if (taskListItems.isEmpty()) {
-            taskListDao.insert(taskList)
-        } else {
-            taskListItemDao.insert(taskList, taskListItems)
+    override suspend fun upsertTaskList(taskList: TaskList): Long {
+        return taskListDao.upsert(taskList)
+    }
+
+    override suspend fun upsertTaskListItem(taskListItem: TaskListItem): Long {
+        if (!taskListDao.exists(taskListItem.taskListId)) {
+            return -1
         }
+
+        return taskListItemDao.upsert(taskListItem)
     }
 }

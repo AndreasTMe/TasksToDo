@@ -7,8 +7,6 @@ import com.andreast.taskstodo.domain.TaskListWithItems
 interface ITasksRepository {
     suspend fun getTaskLists(): List<TaskList>
     suspend fun getTaskListWithItems(id: Long): TaskListWithItems
-    suspend fun insertTaskList(
-        taskList: TaskList,
-        taskListItems: List<TaskListItem> = listOf()
-    )
+    suspend fun upsertTaskList(taskList: TaskList): Long
+    suspend fun upsertTaskListItem(taskListItem: TaskListItem): Long
 }

@@ -49,11 +49,10 @@ class TasksActivity : ComponentActivity() {
                             defaultValue = ""
                         })
                     ) {
-                        TaskItemScreen(
-                            taskScreenService,
-                            _navController,
-                            it.arguments?.getString(TASK_ITEM_SCREEN_ROUTE_KEY).orEmpty()
-                        )
+                        val taskListId = it.arguments?.getString(TASK_ITEM_SCREEN_ROUTE_KEY)?.toLongOrNull()
+                        if (taskListId != null) {
+                            TaskItemScreen(taskScreenService, _navController, taskListId)
+                        }
                     }
                 }
             }

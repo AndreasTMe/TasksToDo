@@ -38,7 +38,7 @@ object ActivityConfiguration {
     }
 
     @Provides
-    fun provideTaskListRepository(
+    fun provideTasksRepository(
         taskListDao: TaskListDao,
         taskListItemDao: TaskListItemDao
     ): ITasksRepository {

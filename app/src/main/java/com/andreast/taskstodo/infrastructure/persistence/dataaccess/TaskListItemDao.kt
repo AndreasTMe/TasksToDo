@@ -1,11 +1,8 @@
 package com.andreast.taskstodo.infrastructure.persistence.dataaccess
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
-import com.andreast.taskstodo.domain.TaskList
+import androidx.room.Upsert
 import com.andreast.taskstodo.domain.TaskListItem
 import com.andreast.taskstodo.domain.TaskListItemTable
 
@@ -21,7 +18,6 @@ interface TaskListItemDao {
     )
     suspend fun getAllByTaskListId(id: Long): List<TaskListItem>
 
-    @Transaction
-    @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insert(taskList: TaskList, taskListItems: List<TaskListItem>)
+    @Upsert
+    suspend fun upsert(taskListItem: TaskListItem): Long
 }
