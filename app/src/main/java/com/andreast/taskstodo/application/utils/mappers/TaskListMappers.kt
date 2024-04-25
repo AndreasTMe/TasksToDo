@@ -1,4 +1,4 @@
-package com.andreast.taskstodo.application.mappers
+package com.andreast.taskstodo.application.utils.mappers
 
 import com.andreast.taskstodo.application.dto.TaskListDto
 import com.andreast.taskstodo.domain.TaskList

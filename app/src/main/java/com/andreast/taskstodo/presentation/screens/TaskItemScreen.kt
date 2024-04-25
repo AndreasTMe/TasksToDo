@@ -71,12 +71,22 @@ fun TaskItemScreen(
                         items(taskList.items.size) { it ->
                             RecursiveTaskItemRow(
                                 task = taskList.items[it],
-                                index = it,
-                                onItemChecked = { indexTree ->
-                                    val newTaskList = taskList.copy()
-                                    if (newTaskList.tryUpdateChecked(indexTree)) {
-                                        setTaskList(newTaskList)
+                                onCheckTask = { id, isChecked ->
+                                    coroutineScope.launch {
+                                        taskScreenService.updateTaskListItemCompletedState(
+                                            id,
+                                            isChecked
+                                        )
                                     }
+                                },
+                                onEditTask = {
+
+                                },
+                                onDeleteTask = {
+
+                                },
+                                onAddSubTask = {
+
                                 }
                             )
                         }

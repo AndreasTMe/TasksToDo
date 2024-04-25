@@ -1,8 +1,13 @@
 package com.andreast.taskstodo.infrastructure.persistence.repositories
 
 import com.andreast.taskstodo.application.persistence.ITasksRepository
+import com.andreast.taskstodo.application.utils.Fake
 import com.andreast.taskstodo.domain.TaskList
 import com.andreast.taskstodo.domain.TaskListItem
+import com.andreast.taskstodo.domain.TaskListItemIdAndIsCompleted
+import com.andreast.taskstodo.domain.TaskListItemIdAndOrder
+import com.andreast.taskstodo.domain.TaskListItemIdAndParentId
+import com.andreast.taskstodo.domain.TaskListItemIdAndTitle
 import com.andreast.taskstodo.domain.TaskListWithItems
 import com.andreast.taskstodo.infrastructure.persistence.dataaccess.TaskListDao
 import com.andreast.taskstodo.infrastructure.persistence.dataaccess.TaskListItemDao
@@ -33,5 +38,14 @@ class TasksRepository @Inject constructor(
         }
 
         return taskListItemDao.upsert(taskListItem)
+    }
+
+    override suspend fun updateTaskListItem(taskListItem: Fake<TaskListItem>) {
+        when (taskListItem) {
+            is TaskListItemIdAndParentId -> taskListItemDao.updateParentId(taskListItem)
+            is TaskListItemIdAndTitle -> taskListItemDao.updateTitle(taskListItem)
+            is TaskListItemIdAndOrder -> taskListItemDao.updateOrder(taskListItem)
+            is TaskListItemIdAndIsCompleted -> taskListItemDao.updateIsCompleted(taskListItem)
+        }
     }
 }

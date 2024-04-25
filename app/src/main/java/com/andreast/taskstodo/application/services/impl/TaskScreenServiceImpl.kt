@@ -2,13 +2,12 @@ package com.andreast.taskstodo.application.services.impl
 
 import com.andreast.taskstodo.application.dto.TaskListDto
 import com.andreast.taskstodo.application.dto.TaskListItemDto
-import com.andreast.taskstodo.application.mappers.TaskListItemMappers
-import com.andreast.taskstodo.application.mappers.TaskListMappers
 import com.andreast.taskstodo.application.persistence.ITasksRepository
 import com.andreast.taskstodo.application.services.ITaskScreenService
+import com.andreast.taskstodo.application.utils.mappers.TaskListItemMappers
+import com.andreast.taskstodo.application.utils.mappers.TaskListMappers
 import com.andreast.taskstodo.domain.TaskListItem
 import java.util.stream.Collectors
-import java.util.stream.Stream
 import javax.inject.Inject
 
 class TaskScreenServiceImpl @Inject constructor(
@@ -32,10 +31,9 @@ class TaskScreenServiceImpl @Inject constructor(
             return taskListDto
         }
 
-        val taskListItems = taskListWithItems.taskListItems.stream()
-        taskListDto.items = getTaskListItemsWithoutParent(taskListItems)
+        taskListDto.items = getTaskListItemsWithoutParent(taskListWithItems.taskListItems)
 
-        val taskListItemsMap = mapTaskListItemsWithParent(taskListItems)
+        val taskListItemsMap = mapTaskListItemsWithParent(taskListWithItems.taskListItems)
 
         populateTaskListItemsChildrenRecursive(taskListDto.items, taskListItemsMap)
 
@@ -54,8 +52,33 @@ class TaskScreenServiceImpl @Inject constructor(
         )
     }
 
-    private fun getTaskListItemsWithoutParent(items: Stream<TaskListItem>): MutableList<TaskListItemDto> {
+    override suspend fun updateTaskListItemTitle(id: Long, title: String) {
+        repository.updateTaskListItem(
+            TaskListItemMappers.onlyIdAndTitleToEntity(id, title)
+        )
+    }
+
+    override suspend fun updateTaskListItemParentId(id: Long, parentId: Long) {
+        repository.updateTaskListItem(
+            TaskListItemMappers.onlyIdAndParentIdToEntity(id, parentId)
+        )
+    }
+
+    override suspend fun updateTaskListItemOrder(id: Long, order: Int) {
+        repository.updateTaskListItem(
+            TaskListItemMappers.onlyIdAndOrderToEntity(id, order)
+        )
+    }
+
+    override suspend fun updateTaskListItemCompletedState(id: Long, isCompleted: Boolean) {
+        repository.updateTaskListItem(
+            TaskListItemMappers.onlyIdAndIsCompletedToEntity(id, isCompleted)
+        )
+    }
+
+    private fun getTaskListItemsWithoutParent(items: List<TaskListItem>): MutableList<TaskListItemDto> {
         return items
+            .stream()
             .filter {
                 it.parentId == null
             }
@@ -68,9 +91,10 @@ class TaskScreenServiceImpl @Inject constructor(
             .collect(Collectors.toList())
     }
 
-    private fun mapTaskListItemsWithParent(items: Stream<TaskListItem>): MutableMap<Long, MutableList<TaskListItemDto>> {
+    private fun mapTaskListItemsWithParent(items: List<TaskListItem>): MutableMap<Long, MutableList<TaskListItemDto>> {
         val taskListItemsMap = mutableMapOf<Long, MutableList<TaskListItemDto>>()
         items
+            .stream()
             .filter {
                 it.parentId != null
             }

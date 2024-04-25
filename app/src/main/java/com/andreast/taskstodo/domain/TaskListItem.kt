@@ -5,6 +5,7 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
+import com.andreast.taskstodo.application.utils.Fake
 
 object TaskListItemTable {
     const val NAME = "task_list_item"
@@ -39,6 +40,37 @@ data class TaskListItem(
     val isCompleted: Boolean
 )
 
+data class TaskListItemIdAndParentId(
+    @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
+    val id: Long,
+
+    @ColumnInfo(name = TaskListItemTable.COLUMN_PARENT_ID)
+    val parentId: Long?
+) : Fake<TaskListItem>
+
+data class TaskListItemIdAndTitle(
+    @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
+    val id: Long,
+
+    @ColumnInfo(name = TaskListItemTable.COLUMN_TITLE)
+    val title: String
+) : Fake<TaskListItem>
+
+data class TaskListItemIdAndOrder(
+    @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
+    val id: Long = 0,
+
+    @ColumnInfo(name = TaskListItemTable.COLUMN_ORDER)
+    val order: Int
+) : Fake<TaskListItem>
+
+data class TaskListItemIdAndIsCompleted(
+    @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
+    val id: Long = 0,
+
+    @ColumnInfo(name = TaskListItemTable.COLUMN_IS_COMPLETED)
+    val isCompleted: Boolean
+) : Fake<TaskListItem>
 
 data class TaskListWithItems(
     @Embedded
