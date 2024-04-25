@@ -76,6 +76,10 @@ class TaskScreenServiceImpl @Inject constructor(
         )
     }
 
+    override suspend fun deleteTaskListItemById(id: Long) {
+        repository.deleteTaskListItemById(id)
+    }
+
     private fun getTaskListItemsWithoutParent(items: List<TaskListItem>): MutableList<TaskListItemDto> {
         return items
             .stream()

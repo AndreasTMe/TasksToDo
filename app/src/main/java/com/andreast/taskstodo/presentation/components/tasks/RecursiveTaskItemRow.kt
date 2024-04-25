@@ -34,12 +34,17 @@ import com.andreast.taskstodo.application.dto.TaskListItemDto
 fun RecursiveTaskItemRow(
     task: TaskListItemDto,
     onCheckTask: (id: Long, isChecked: Boolean) -> Unit,
-    onEditTask: (id: Long) -> Unit,
+    onEditTask: (taskToEdit: TaskListItemDto) -> Unit,
     onDeleteTask: (id: Long) -> Unit,
-    onAddSubTask: (id: Long) -> Unit
+    onAddSubTask: (parent: TaskListItemDto) -> Unit
 ) {
     val (isCompleted, setIsCompleted) = remember { mutableStateOf(task.isCompleted) }
-    val (isExpanded, setIsExpanded) = remember { mutableStateOf(false) }
+    val (isDeleted, setIsDeleted) = remember { mutableStateOf(false) }
+    val (isDropdownExpanded, setIsDropdownExpanded) = remember { mutableStateOf(false) }
+
+    if (isDeleted) {
+        return
+    }
 
     Row(
         modifier = Modifier.draggable(
@@ -69,17 +74,17 @@ fun RecursiveTaskItemRow(
             IconButton(
                 modifier = Modifier.width(40.dp),
                 onClick = {
-                    setIsExpanded(true)
+                    setIsDropdownExpanded(true)
                 }
             ) {
                 Icon(Icons.Filled.MoreVert, contentDescription = "Task Options")
             }
 
             DropdownMenu(
-                expanded = isExpanded,
+                expanded = isDropdownExpanded,
                 offset = DpOffset(x = 0.dp, y = 0.dp),
                 onDismissRequest = {
-                    setIsExpanded(false)
+                    setIsDropdownExpanded(false)
                 }
             ) {
                 DropdownMenuItem(
@@ -87,21 +92,28 @@ fun RecursiveTaskItemRow(
                         Icon(Icons.Filled.Add, contentDescription = "Add sub-task")
                     },
                     text = { Text("Add sub-task") },
-                    onClick = { }
+                    onClick = {
+                        onAddSubTask(task)
+                    }
                 )
                 DropdownMenuItem(
                     leadingIcon = {
                         Icon(Icons.Filled.Edit, contentDescription = "Edit task")
                     },
                     text = { Text("Edit task") },
-                    onClick = { }
+                    onClick = {
+                        onEditTask(task)
+                    }
                 )
                 DropdownMenuItem(
                     leadingIcon = {
                         Icon(Icons.Filled.Delete, contentDescription = "Delete task")
                     },
                     text = { Text("Delete task") },
-                    onClick = { }
+                    onClick = {
+                        onDeleteTask(task.id)
+                        setIsDeleted(true)
+                    }
                 )
             }
         }

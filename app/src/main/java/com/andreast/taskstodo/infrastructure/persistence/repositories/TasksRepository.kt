@@ -48,4 +48,8 @@ class TasksRepository @Inject constructor(
             is TaskListItemIdAndIsCompleted -> taskListItemDao.updateIsCompleted(taskListItem)
         }
     }
+
+    override suspend fun deleteTaskListItemById(id: Long) {
+        taskListItemDao.deleteById(id)
+    }
 }

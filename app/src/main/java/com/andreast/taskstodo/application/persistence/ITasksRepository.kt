@@ -11,4 +11,5 @@ interface ITasksRepository {
     suspend fun upsertTaskList(taskList: TaskList): Long
     suspend fun upsertTaskListItem(taskListItem: TaskListItem): Long
     suspend fun updateTaskListItem(taskListItem: Fake<TaskListItem>)
+    suspend fun deleteTaskListItemById(id: Long)
 }
