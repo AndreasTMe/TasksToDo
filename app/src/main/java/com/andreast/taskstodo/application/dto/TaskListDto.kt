@@ -5,10 +5,25 @@ data class TaskListDto(
     var title: String = "",
     var items: MutableList<TaskListItemDto> = mutableListOf()
 ) {
+    fun getItemById(id: Long): TaskListItemDto? {
+        return getItemByIdRecursive(id, items)
+    }
+
     fun getParentAndChildrenIds(parentId: Long): List<Long> {
         val parent = getItemByIdRecursive(parentId, items) ?: return listOf()
 
         return listOf(parentId) + getAllIdsRecursive(parent.children)
+    }
+
+    fun addItem(taskListItem: TaskListItemDto) {
+        if (taskListItem.parentId == null) {
+            items.add(taskListItem)
+            return
+        }
+
+        val parent = getItemByIdRecursive(taskListItem.parentId!!, items) ?: return
+
+        parent.children.add(taskListItem)
     }
 
     fun removeItem(taskListItem: TaskListItemDto) {
@@ -21,6 +36,17 @@ data class TaskListDto(
                 return
             }
         }
+    }
+
+    fun calculateOrder(parentId: Long?): Int {
+        if (parentId == null) {
+            return items.maxBy { it.order }.order + 1
+        }
+
+        val parent = getItemByIdRecursive(parentId, items)
+        assert(parent != null) { "Parent not found for id $parentId" }
+
+        return parent!!.children.maxBy { it.order }.order.plus(1)
     }
 
     private fun getItemByIdRecursive(

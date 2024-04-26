@@ -34,8 +34,7 @@ import kotlinx.coroutines.launch
 private enum class TaskItemAction {
     None,
     AddTask,
-    EditTask,
-    AddSubTask
+    EditTask
 }
 
 @Composable
@@ -105,12 +104,15 @@ fun TaskItemScreen(
                                     },
                                     onDeleteTask = { taskToDelete ->
                                         coroutineScope.launch {
-                                            taskScreenService.deleteTaskListItemById(taskToDelete.id, taskList.value)
+                                            taskScreenService.deleteTaskListItemById(
+                                                taskToDelete.id,
+                                                taskList.value
+                                            )
                                             taskList.value.removeItem(taskToDelete)
                                         }
                                     },
                                     onAddSubTask = { parent ->
-                                        taskItemAction.value = TaskItemAction.AddSubTask
+                                        taskItemAction.value = TaskItemAction.AddTask
                                         selectedItem.value = parent
                                         isDialogOpen.value = true
                                     }
@@ -155,30 +157,33 @@ fun TaskItemScreen(
     }
 
     if (isDialogOpen.value) {
-        // TODO: Handle EditTask & AddSubTask
         InputDialog(
-            label = getDialogLabel(taskItemAction.value),
+            label = getDialogLabel(taskItemAction.value, selectedItem.value != null),
+            value = getDialogValue(taskItemAction.value, selectedItem.value),
             placeholder = "Do the thing...",
             onConfirmRequest = {
                 if (it == "") {
                     return@InputDialog
                 }
 
-                val newTaskListItem = TaskListItemDto(
-                    title = it,
-                    taskListId = taskListId,
-                    order = taskList.value.items.maxBy {
-                        it.order
-                    }.order + 1
-                )
+                val taskListItemToHandle =
+                    if (taskItemAction.value == TaskItemAction.EditTask && selectedItem.value != null)
+                        selectedItem.value!!
+                    else
+                        TaskListItemDto(
+                            parentId = selectedItem.value?.id,
+                            taskListId = taskListId,
+                            order = taskList.value.calculateOrder(selectedItem.value?.parentId)
+                        )
+                taskListItemToHandle.title = it
 
                 coroutineScope.launch {
                     val id =
-                        taskScreenService.upsertTaskListItem(newTaskListItem)
+                        taskScreenService.upsertTaskListItem(taskListItemToHandle)
 
-                    if (id > 0) {
-                        newTaskListItem.id = id
-                        taskList.value.items.add(newTaskListItem)
+                    if (taskItemAction.value != TaskItemAction.EditTask && id > 0) {
+                        taskListItemToHandle.id = id
+                        taskList.value.addItem(taskListItemToHandle)
                     }
                 }
             },
@@ -191,11 +196,18 @@ fun TaskItemScreen(
     }
 }
 
-private fun getDialogLabel(taskItemAction: TaskItemAction): String {
+private fun getDialogLabel(taskItemAction: TaskItemAction, hasSelected: Boolean): String {
     return when (taskItemAction) {
         TaskItemAction.None -> ""
-        TaskItemAction.AddTask -> "New Task"
+        TaskItemAction.AddTask -> if (hasSelected) "New Sub-task" else "New Task"
         TaskItemAction.EditTask -> "Edit Task"
-        TaskItemAction.AddSubTask -> "New Sub-task"
+    }
+}
+
+private fun getDialogValue(taskItemAction: TaskItemAction, selectedItem: TaskListItemDto?): String {
+    return when (taskItemAction) {
+        TaskItemAction.None -> ""
+        TaskItemAction.AddTask -> ""
+        TaskItemAction.EditTask -> selectedItem?.title ?: ""
     }
 }

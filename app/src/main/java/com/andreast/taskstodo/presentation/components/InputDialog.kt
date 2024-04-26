@@ -25,13 +25,14 @@ private val MAX_WIDTH = 560.dp
 @Composable
 fun InputDialog(
     label: String,
+    value: String = "",
     placeholder: String? = null,
     onDismissRequest: (() -> Unit)? = null,
     onConfirmRequest: (value: String) -> Unit,
     onError: ((ex: Exception) -> Unit)? = null,
     onFinally: (() -> Unit)? = null,
 ) {
-    val fieldValue = remember { mutableStateOf("") }
+    val fieldValue = remember { mutableStateOf(value) }
 
     Dialog(
         onDismissRequest = {
