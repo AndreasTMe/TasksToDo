@@ -35,14 +35,14 @@ fun RecursiveTaskItemRow(
     task: TaskListItemDto,
     onCheckTask: (id: Long, isChecked: Boolean) -> Unit,
     onEditTask: (taskToEdit: TaskListItemDto) -> Unit,
-    onDeleteTask: (id: Long) -> Unit,
+    onDeleteTask: (taskToDelete: TaskListItemDto) -> Unit,
     onAddSubTask: (parent: TaskListItemDto) -> Unit
 ) {
-    val (isCompleted, setIsCompleted) = remember { mutableStateOf(task.isCompleted) }
-    val (isDeleted, setIsDeleted) = remember { mutableStateOf(false) }
-    val (isDropdownExpanded, setIsDropdownExpanded) = remember { mutableStateOf(false) }
+    val isCompleted = remember { mutableStateOf(task.isCompleted) }
+    val isDeleted = remember { mutableStateOf(false) }
+    val isDropdownExpanded = remember { mutableStateOf(false) }
 
-    if (isDeleted) {
+    if (isDeleted.value) {
         return
     }
 
@@ -56,9 +56,9 @@ fun RecursiveTaskItemRow(
     ) {
         Checkbox(
             modifier = Modifier.width(40.dp),
-            checked = isCompleted,
+            checked = isCompleted.value,
             onCheckedChange = {
-                setIsCompleted(it)
+                isCompleted.value = it
                 onCheckTask(task.id, it)
             })
         Text(
@@ -67,24 +67,24 @@ fun RecursiveTaskItemRow(
                 .align(Alignment.CenterVertically),
             text = task.title,
             style = TextStyle(
-                textDecoration = if (isCompleted) TextDecoration.LineThrough else TextDecoration.None,
+                textDecoration = if (isCompleted.value) TextDecoration.LineThrough else TextDecoration.None,
             )
         )
         Box {
             IconButton(
                 modifier = Modifier.width(40.dp),
                 onClick = {
-                    setIsDropdownExpanded(true)
+                    isDropdownExpanded.value = true
                 }
             ) {
                 Icon(Icons.Filled.MoreVert, contentDescription = "Task Options")
             }
 
             DropdownMenu(
-                expanded = isDropdownExpanded,
+                expanded = isDropdownExpanded.value,
                 offset = DpOffset(x = 0.dp, y = 0.dp),
                 onDismissRequest = {
-                    setIsDropdownExpanded(false)
+                    isDropdownExpanded.value = false
                 }
             ) {
                 DropdownMenuItem(
@@ -94,6 +94,7 @@ fun RecursiveTaskItemRow(
                     text = { Text("Add sub-task") },
                     onClick = {
                         onAddSubTask(task)
+                        isDropdownExpanded.value = false
                     }
                 )
                 DropdownMenuItem(
@@ -103,6 +104,7 @@ fun RecursiveTaskItemRow(
                     text = { Text("Edit task") },
                     onClick = {
                         onEditTask(task)
+                        isDropdownExpanded.value = false
                     }
                 )
                 DropdownMenuItem(
@@ -111,8 +113,9 @@ fun RecursiveTaskItemRow(
                     },
                     text = { Text("Delete task") },
                     onClick = {
-                        onDeleteTask(task.id)
-                        setIsDeleted(true)
+                        onDeleteTask(task)
+                        isDeleted.value = true
+                        isDropdownExpanded.value = false
                     }
                 )
             }

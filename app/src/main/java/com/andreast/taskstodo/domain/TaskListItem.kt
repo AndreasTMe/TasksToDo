@@ -5,7 +5,7 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
-import com.andreast.taskstodo.application.utils.Fake
+import com.andreast.taskstodo.application.utils.InsteadOf
 
 object TaskListItemTable {
     const val NAME = "task_list_item"
@@ -46,7 +46,7 @@ data class TaskListItemIdAndParentId(
 
     @ColumnInfo(name = TaskListItemTable.COLUMN_PARENT_ID)
     val parentId: Long?
-) : Fake<TaskListItem>
+) : InsteadOf<TaskListItem>
 
 data class TaskListItemIdAndTitle(
     @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
@@ -54,7 +54,7 @@ data class TaskListItemIdAndTitle(
 
     @ColumnInfo(name = TaskListItemTable.COLUMN_TITLE)
     val title: String
-) : Fake<TaskListItem>
+) : InsteadOf<TaskListItem>
 
 data class TaskListItemIdAndOrder(
     @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
@@ -62,7 +62,7 @@ data class TaskListItemIdAndOrder(
 
     @ColumnInfo(name = TaskListItemTable.COLUMN_ORDER)
     val order: Int
-) : Fake<TaskListItem>
+) : InsteadOf<TaskListItem>
 
 data class TaskListItemIdAndIsCompleted(
     @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
@@ -70,7 +70,7 @@ data class TaskListItemIdAndIsCompleted(
 
     @ColumnInfo(name = TaskListItemTable.COLUMN_IS_COMPLETED)
     val isCompleted: Boolean
-) : Fake<TaskListItem>
+) : InsteadOf<TaskListItem>
 
 data class TaskListWithItems(
     @Embedded

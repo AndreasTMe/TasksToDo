@@ -31,6 +31,13 @@ import com.andreast.taskstodo.presentation.components.InputField
 import com.andreast.taskstodo.presentation.components.tasks.RecursiveTaskItemRow
 import kotlinx.coroutines.launch
 
+private enum class TaskItemAction {
+    None,
+    AddTask,
+    EditTask,
+    AddSubTask
+}
+
 @Composable
 fun TaskItemScreen(
     taskScreenService: ITaskScreenService,
@@ -39,13 +46,14 @@ fun TaskItemScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    val (taskList, setTaskList) = remember { mutableStateOf(TaskListDto()) }
-    val (selectedItem, setSelectedItem) = remember { mutableStateOf<TaskListItemDto?>(null) }
-    val (isDialogOpen, setIsDialogOpen) = remember { mutableStateOf(false) }
+    val taskList = remember { mutableStateOf(TaskListDto()) }
+    val taskItemAction = remember { mutableStateOf(TaskItemAction.None) }
+    val selectedItem = remember { mutableStateOf<TaskListItemDto?>(null) }
+    val isDialogOpen = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         coroutineScope.launch {
-            setTaskList(taskScreenService.getTaskListWithItems(taskListId))
+            taskList.value = taskScreenService.getTaskListWithItems(taskListId)
         }
     }
 
@@ -63,15 +71,15 @@ fun TaskItemScreen(
                 ) {
                     Box {
                         InputField(
-                            value = taskList.title,
+                            value = taskList.value.title,
                             placeholder = "Title",
                             onValueChange = {
-                                setTaskList(taskList.copy(title = it))
+                                taskList.value.title = it
                             },
                             onFocusChange = { state, valueChanged ->
                                 if (!state.hasFocus && valueChanged) {
                                     coroutineScope.launch {
-                                        taskScreenService.upsertTaskList(taskList)
+                                        taskScreenService.upsertTaskList(taskList.value)
                                     }
                                 }
                             }
@@ -79,9 +87,9 @@ fun TaskItemScreen(
                     }
                     Box {
                         LazyColumn {
-                            items(taskList.items.size) { it ->
+                            items(taskList.value.items.size) { it ->
                                 RecursiveTaskItemRow(
-                                    task = taskList.items[it],
+                                    task = taskList.value.items[it],
                                     onCheckTask = { id, isChecked ->
                                         coroutineScope.launch {
                                             taskScreenService.updateTaskListItemCompletedState(
@@ -91,15 +99,20 @@ fun TaskItemScreen(
                                         }
                                     },
                                     onEditTask = { taskToEdit ->
-                                        setSelectedItem(taskToEdit)
+                                        taskItemAction.value = TaskItemAction.EditTask
+                                        selectedItem.value = taskToEdit
+                                        isDialogOpen.value = true
                                     },
-                                    onDeleteTask = { id ->
+                                    onDeleteTask = { taskToDelete ->
                                         coroutineScope.launch {
-                                            taskScreenService.deleteTaskListItemById(id)
+                                            taskScreenService.deleteTaskListItemById(taskToDelete.id, taskList.value)
+                                            taskList.value.removeItem(taskToDelete)
                                         }
                                     },
                                     onAddSubTask = { parent ->
-                                        setSelectedItem(parent)
+                                        taskItemAction.value = TaskItemAction.AddSubTask
+                                        selectedItem.value = parent
+                                        isDialogOpen.value = true
                                     }
                                 )
                             }
@@ -119,12 +132,12 @@ fun TaskItemScreen(
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     onClick = {
-                        setIsDialogOpen(true)
+                        taskItemAction.value = TaskItemAction.AddTask
+                        isDialogOpen.value = true
                     }
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = "Add task")
                     Text(
-                        modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
                         text = "Add task"
                     )
@@ -141,23 +154,22 @@ fun TaskItemScreen(
         }
     }
 
-    if (isDialogOpen) {
+    if (isDialogOpen.value) {
+        // TODO: Handle EditTask & AddSubTask
         InputDialog(
-            label = "New Task",
+            label = getDialogLabel(taskItemAction.value),
             placeholder = "Do the thing...",
-            onDismissRequest = {
-                setIsDialogOpen(false)
-            },
-            onConfirmation = {
+            onConfirmRequest = {
                 if (it == "") {
-                    setIsDialogOpen(false)
                     return@InputDialog
                 }
 
                 val newTaskListItem = TaskListItemDto(
                     title = it,
                     taskListId = taskListId,
-                    order = 0
+                    order = taskList.value.items.maxBy {
+                        it.order
+                    }.order + 1
                 )
 
                 coroutineScope.launch {
@@ -165,16 +177,25 @@ fun TaskItemScreen(
                         taskScreenService.upsertTaskListItem(newTaskListItem)
 
                     if (id > 0) {
-                        setTaskList(
-                            taskList.copy(
-                                items = mutableListOf(newTaskListItem)
-                            )
-                        )
+                        newTaskListItem.id = id
+                        taskList.value.items.add(newTaskListItem)
                     }
-
-                    setIsDialogOpen(false)
                 }
             },
+            onFinally = {
+                taskItemAction.value = TaskItemAction.None
+                selectedItem.value = null
+                isDialogOpen.value = false
+            }
         )
+    }
+}
+
+private fun getDialogLabel(taskItemAction: TaskItemAction): String {
+    return when (taskItemAction) {
+        TaskItemAction.None -> ""
+        TaskItemAction.AddTask -> "New Task"
+        TaskItemAction.EditTask -> "Edit Task"
+        TaskItemAction.AddSubTask -> "New Sub-task"
     }
 }

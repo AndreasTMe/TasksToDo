@@ -38,7 +38,6 @@ interface TaskListItemDao {
     @Update(entity = TaskListItem::class)
     suspend fun updateIsCompleted(taskListItem: TaskListItemIdAndIsCompleted)
 
-    // TODO: This should delete all children as well
-    @Query("DELETE FROM ${TaskListItemTable.NAME} WHERE ${TaskListItemTable.COLUMN_ID} = :id")
-    suspend fun deleteById(id: Long)
+    @Query("DELETE FROM ${TaskListItemTable.NAME} WHERE ${TaskListItemTable.COLUMN_ID} IN (:ids)")
+    suspend fun deleteAllById(ids: List<Long>)
 }

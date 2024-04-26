@@ -22,7 +22,7 @@ fun InputField(
     onValueChange: ((value: String) -> Unit)? = null,
     onFocusChange: ((state: FocusState, valueChanged: Boolean) -> Unit)? = null,
 ) {
-    val (valueChanged, setValueChanged) = remember { mutableStateOf(false) }
+    val valueChanged = remember { mutableStateOf(false) }
 
     TextField(
         modifier = Modifier
@@ -30,8 +30,8 @@ fun InputField(
             .focusable()
             .onFocusChanged {
                 if (onFocusChange != null) {
-                    onFocusChange(it, valueChanged)
-                    setValueChanged(false)
+                    onFocusChange(it, valueChanged.value)
+                    valueChanged.value = false
                 }
             },
         value = value,
@@ -46,7 +46,7 @@ fun InputField(
         colors = TextFieldDefaults.noBackground(),
         onValueChange = {
             if (onValueChange != null) {
-                setValueChanged(true)
+                valueChanged.value = true
                 onValueChange(it)
             }
         },

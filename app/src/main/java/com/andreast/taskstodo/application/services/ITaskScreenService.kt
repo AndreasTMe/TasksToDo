@@ -12,5 +12,5 @@ interface ITaskScreenService {
     suspend fun updateTaskListItemParentId(id: Long, parentId: Long)
     suspend fun updateTaskListItemOrder(id: Long, order: Int)
     suspend fun updateTaskListItemCompletedState(id: Long, isCompleted: Boolean)
-    suspend fun deleteTaskListItemById(id: Long)
+    suspend fun deleteTaskListItemById(id: Long, taskList: TaskListDto)
 }

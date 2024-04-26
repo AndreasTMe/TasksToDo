@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.andreast.taskstodo.application.utils.Try
 
 private val MIN_WIDTH = 280.dp
 private val MAX_WIDTH = 560.dp
@@ -25,12 +26,22 @@ private val MAX_WIDTH = 560.dp
 fun InputDialog(
     label: String,
     placeholder: String? = null,
-    onDismissRequest: () -> Unit,
-    onConfirmation: (value: String) -> Unit
+    onDismissRequest: (() -> Unit)? = null,
+    onConfirmRequest: (value: String) -> Unit,
+    onError: ((ex: Exception) -> Unit)? = null,
+    onFinally: (() -> Unit)? = null,
 ) {
-    val (value, setValue) = remember { mutableStateOf("") }
+    val fieldValue = remember { mutableStateOf("") }
 
-    Dialog(onDismissRequest = { onDismissRequest() }) {
+    Dialog(
+        onDismissRequest = {
+            Try.resolve(
+                onSuccess = onDismissRequest,
+                onError = onError,
+                onFinally = onFinally
+            )
+        }
+    ) {
         Card(
             modifier = Modifier
                 .sizeIn(minWidth = MIN_WIDTH, maxWidth = MAX_WIDTH),
@@ -50,10 +61,10 @@ fun InputDialog(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     InputField(
-                        value = value,
+                        value = fieldValue.value,
                         placeholder = placeholder,
                         onValueChange = {
-                            setValue(it)
+                            fieldValue.value = it
                         }
                     )
                 }
@@ -63,13 +74,26 @@ fun InputDialog(
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     TextButton(
-                        onClick = { onDismissRequest() },
+                        onClick = {
+                            Try.resolve(
+                                onSuccess = onDismissRequest,
+                                onError = onError,
+                                onFinally = onFinally
+                            )
+                        },
                         modifier = Modifier.padding(8.dp),
                     ) {
                         Text("Cancel")
                     }
                     TextButton(
-                        onClick = { onConfirmation(value) },
+                        onClick = {
+                            Try.resolve(
+                                result = fieldValue.value,
+                                onSuccess = onConfirmRequest,
+                                onError = onError,
+                                onFinally = onFinally
+                            )
+                        },
                         modifier = Modifier.padding(8.dp),
                     ) {
                         Text("Confirm")

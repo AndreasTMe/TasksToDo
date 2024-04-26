@@ -39,7 +39,7 @@ fun TaskScreen(
     navHostController: NavHostController
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val (taskLists, setTaskLists) = remember { mutableStateOf<List<TaskListDto>>(listOf()) }
+    val taskLists = remember { mutableStateOf<List<TaskListDto>>(listOf()) }
 
     Scaffold(
         content = { padding ->
@@ -50,10 +50,10 @@ fun TaskScreen(
             ) {
                 LazyVerticalGrid(columns = GridCells.Fixed(3)) {
                     coroutineScope.launch {
-                        setTaskLists(taskScreenService.getAllTaskLists())
+                        taskLists.value = taskScreenService.getAllTaskLists()
                     }
 
-                    items(taskLists.size) {
+                    items(taskLists.value.size) {
                         Column(
                             modifier = Modifier
                                 .aspectRatio(1f)
@@ -69,7 +69,7 @@ fun TaskScreen(
                                 )
                                 .clickable {
                                     navHostController.navigate(
-                                        route = Screen.TaskItemScreen.createRoute(taskId = taskLists[it].id.toString())
+                                        route = Screen.TaskItemScreen.createRoute(taskId = taskLists.value[it].id.toString())
                                     )
                                 },
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -82,7 +82,7 @@ fun TaskScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = taskLists[it].title ?: "Untitled",
+                                    text = taskLists.value[it].title ?: "Untitled",
                                     color = MaterialTheme.colorScheme.inverseSurface,
                                 )
                             }
@@ -111,10 +111,11 @@ fun TaskScreen(
                     onDismissRequest = {
                         isOpen.value = false
                     },
-                    onConfirmation = {
+                    onConfirmRequest = {
                         if (it != "") {
                             coroutineScope.launch {
-                                val taskListId = taskScreenService.upsertTaskList(TaskListDto(title = it))
+                                val taskListId =
+                                    taskScreenService.upsertTaskList(TaskListDto(title = it))
 
                                 navHostController.navigate(
                                     route = Screen.TaskItemScreen.createRoute(taskListId.toString())
