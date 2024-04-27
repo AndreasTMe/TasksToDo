@@ -47,12 +47,13 @@ fun RecursiveTaskItemRow(
     }
 
     Row(
-        modifier = Modifier.draggable(
-            orientation = Orientation.Horizontal,
-            state = DraggableState { /*TODO*/ },
-            onDragStarted = {},
-            onDragStopped = {}
-        )
+        modifier = Modifier
+            .draggable(
+                orientation = Orientation.Horizontal,
+                state = DraggableState { /*TODO*/ },
+                onDragStarted = {},
+                onDragStopped = {}
+            )
     ) {
         Checkbox(
             modifier = Modifier.width(40.dp),

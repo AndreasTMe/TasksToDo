@@ -24,6 +24,7 @@ import kotlinx.coroutines.android.awaitFrame
 
 @Composable
 fun InputField(
+    label: @Composable (() -> Unit)? = null,
     value: String,
     placeholder: String? = null,
     autoFocus: Boolean = false,
@@ -58,6 +59,7 @@ fun InputField(
                 }
             },
         value = valueState.value,
+        label = label,
         placeholder = {
             if (placeholder != null) {
                 Text(
@@ -83,6 +85,9 @@ private fun TextFieldDefaults.noBackground(): TextFieldColors {
         focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
         disabledContainerColor = Color.Transparent,
-        errorContainerColor = Color.Transparent
+        errorContainerColor = Color.Transparent,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent
     )
 }
