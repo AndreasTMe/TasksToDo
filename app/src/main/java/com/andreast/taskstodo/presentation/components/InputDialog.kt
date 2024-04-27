@@ -11,10 +11,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.andreast.taskstodo.application.utils.Try
@@ -33,6 +35,11 @@ fun InputDialog(
     onFinally: (() -> Unit)? = null,
 ) {
     val fieldValue = remember { mutableStateOf(value) }
+    val keyboard = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(Unit) {
+        keyboard?.show()
+    }
 
     Dialog(
         onDismissRequest = {
@@ -64,6 +71,7 @@ fun InputDialog(
                     InputField(
                         value = fieldValue.value,
                         placeholder = placeholder,
+                        autoFocus = true,
                         onValueChange = {
                             fieldValue.value = it
                         }
