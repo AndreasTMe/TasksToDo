@@ -80,14 +80,18 @@ class TaskListScreenViewModel @AssistedInject constructor(
             return
         }
 
-        if (_uiState.value.screenAction == TaskListScreenAction.EditTask && _uiState.value.selectedItem != null) {
-            if (handleTaskListItemEdit(title)) {
-                refreshScreen()
+        if (_uiState.value.screenAction == TaskListScreenAction.EditTask
+            && _uiState.value.selectedItem != null
+        ) {
+            if (_uiState.value.selectedItem!!.title == title) {
+                return
             }
-            return
+
+            handleTaskListItemEdit(title)
+        } else {
+            handleTaskListItemAdd(title)
         }
 
-        handleTaskListItemAdd(title)
         refreshScreen()
     }
 
@@ -109,11 +113,11 @@ class TaskListScreenViewModel @AssistedInject constructor(
             return false
         }
 
-        val id = taskScreenService.upsertTaskListItem(
+        taskScreenService.upsertTaskListItem(
             _uiState.value.selectedItem!!.copy(title = title)
         )
 
-        return id > 0
+        return true
     }
 
     private fun getParentAndChildrenIds(parentId: Long): List<Long> {
