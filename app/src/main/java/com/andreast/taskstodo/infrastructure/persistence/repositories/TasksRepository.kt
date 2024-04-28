@@ -8,7 +8,6 @@ import com.andreast.taskstodo.domain.TaskListItemIdAndIsCompleted
 import com.andreast.taskstodo.domain.TaskListItemIdAndOrder
 import com.andreast.taskstodo.domain.TaskListItemIdAndParentId
 import com.andreast.taskstodo.domain.TaskListItemIdAndTitle
-import com.andreast.taskstodo.domain.TaskListWithItems
 import com.andreast.taskstodo.infrastructure.persistence.dataaccess.TaskListDao
 import com.andreast.taskstodo.infrastructure.persistence.dataaccess.TaskListItemDao
 import javax.inject.Inject
@@ -21,11 +20,12 @@ class TasksRepository @Inject constructor(
         return taskListDao.getAll()
     }
 
-    override suspend fun getTaskListWithItems(id: Long): TaskListWithItems {
-        val taskList = taskListDao.getById(id)
-        val taskListItems = taskListItemDao.getAllByTaskListId(id)
+    override suspend fun getTaskListById(id: Long): TaskList {
+        return taskListDao.getById(id)
+    }
 
-        return TaskListWithItems(taskList, taskListItems)
+    override suspend fun getTaskListItemsByListId(id: Long): List<TaskListItem> {
+        return taskListItemDao.getAllByTaskListId(id)
     }
 
     override suspend fun upsertTaskList(taskList: TaskList): Long {

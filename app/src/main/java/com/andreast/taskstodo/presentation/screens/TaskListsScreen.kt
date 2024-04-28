@@ -33,14 +33,14 @@ import com.andreast.taskstodo.presentation.components.InputDialog
 import kotlinx.coroutines.launch
 
 @Composable
-fun TaskScreen(
-    taskScreenViewModel: TaskScreenViewModel,
+fun TaskListsScreen(
+    taskListsScreenViewModel: TaskListsScreenViewModel,
     navHostController: NavHostController
 ) {
+    val taskScreenState = taskListsScreenViewModel.uiState.collectAsState()
+
     val coroutineScope = rememberCoroutineScope()
     val isInputDialogOpen = remember { mutableStateOf(false) }
-
-    val taskListsState = taskScreenViewModel.uiState.collectAsState()
 
     Scaffold(
         content = { padding ->
@@ -50,7 +50,7 @@ fun TaskScreen(
                     .padding(padding)
             ) {
                 LazyVerticalGrid(columns = GridCells.Fixed(3)) {
-                    items(taskListsState.value.size) {
+                    items(taskScreenState.value.size) {
                         Column(
                             modifier = Modifier
                                 .aspectRatio(1f)
@@ -66,7 +66,7 @@ fun TaskScreen(
                                 )
                                 .clickable {
                                     navHostController.navigate(
-                                        route = Screen.TaskItemScreen.createRoute(taskId = taskListsState.value[it].id.toString())
+                                        route = Screen.TaskItemScreen.createRoute(taskId = taskScreenState.value[it].id.toString())
                                     )
                                 },
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -79,7 +79,7 @@ fun TaskScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = taskListsState.value[it].title,
+                                    text = taskScreenState.value[it].title,
                                     color = MaterialTheme.colorScheme.inverseSurface,
                                 )
                             }
@@ -109,7 +109,7 @@ fun TaskScreen(
                     onConfirmRequest = {
                         if (it != "") {
                             coroutineScope.launch {
-                                val taskListId = taskScreenViewModel.createTaskList(title = it)
+                                val taskListId = taskListsScreenViewModel.handleTaskListTitleChange(title = it)
                                 assert(taskListId > 0) { "Task list creation returned $taskListId. This should never happen!" }
 
                                 navHostController.navigate(

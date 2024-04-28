@@ -36,7 +36,7 @@ fun RecursiveTaskItemRow(
     task: TaskListItemDto,
     onCheckTask: (id: Long, isChecked: Boolean) -> Unit,
     onEditTask: (taskToEdit: TaskListItemDto) -> Unit,
-    onDeleteTask: (taskToDelete: TaskListItemDto) -> Unit,
+    onDeleteTask: (id: Long) -> Unit,
     onAddSubTask: (parent: TaskListItemDto) -> Unit
 ) {
     val isCompleted = remember { mutableStateOf(task.isCompleted) }
@@ -118,7 +118,7 @@ fun RecursiveTaskItemRow(
                     },
                     text = { Text("Delete task") },
                     onClick = {
-                        onDeleteTask(task)
+                        onDeleteTask(task.id)
                         isDeleted.value = true
                         isDropdownExpanded.value = false
                     }

@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TaskScreenViewModel @Inject constructor(
+class TaskListsScreenViewModel @Inject constructor(
     private val taskScreenService: ITaskScreenService
 ) : ViewModel() {
 
@@ -21,15 +21,15 @@ class TaskScreenViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            resetScreen()
+            refreshScreen()
         }
     }
 
-    suspend fun createTaskList(title: String): Long {
+    suspend fun handleTaskListTitleChange(title: String): Long {
         return taskScreenService.upsertTaskList(TaskListDto(title = title))
     }
 
-    private suspend fun resetScreen() {
+    private suspend fun refreshScreen() {
         _uiState.value = taskScreenService.getAllTaskLists()
     }
 }

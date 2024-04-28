@@ -23,21 +23,23 @@ class TaskScreenServiceImpl @Inject constructor(
             .collect(Collectors.toList())
     }
 
-    override suspend fun getTaskListWithItems(id: Long): TaskListDto {
-        val taskListWithItems = repository.getTaskListWithItems(id)
-        val taskListDto = TaskListMappers.entityToDto(taskListWithItems.taskList)
+    override suspend fun getTaskListById(id: Long): TaskListDto {
+        return TaskListMappers.entityToDto(repository.getTaskListById(id))
+    }
 
-        if (taskListWithItems.taskListItems.isEmpty()) {
-            return taskListDto
+    override suspend fun getTaskListItemsByListId(id: Long): List<TaskListItemDto> {
+        val taskListItemList = repository.getTaskListItemsByListId(id)
+
+        if (taskListItemList.isEmpty()) {
+            return listOf()
         }
 
-        taskListDto.items = getTaskListItemsWithoutParent(taskListWithItems.taskListItems)
+        val taskListParentItems = getTaskListItemsWithoutParent(taskListItemList)
+        val taskListChildrenMap = mapTaskListItemsWithParent(taskListItemList)
 
-        val taskListItemsMap = mapTaskListItemsWithParent(taskListWithItems.taskListItems)
+        populateTaskListItemsChildrenRecursive(taskListParentItems, taskListChildrenMap)
 
-        populateTaskListItemsChildrenRecursive(taskListDto.items, taskListItemsMap)
-
-        return taskListDto
+        return taskListParentItems
     }
 
     override suspend fun upsertTaskList(taskList: TaskListDto): Long {
@@ -76,8 +78,8 @@ class TaskScreenServiceImpl @Inject constructor(
         )
     }
 
-    override suspend fun deleteTaskListItemById(id: Long, taskList: TaskListDto) {
-        repository.deleteTaskListItemsById(taskList.getParentAndChildrenIds(id))
+    override suspend fun deleteTaskListItemsByIds(ids: List<Long>) {
+        repository.deleteTaskListItemsById(ids.distinct())
     }
 
     private fun getTaskListItemsWithoutParent(items: List<TaskListItem>): MutableList<TaskListItemDto> {
@@ -115,10 +117,10 @@ class TaskScreenServiceImpl @Inject constructor(
     }
 
     private fun populateTaskListItemsChildrenRecursive(
-        items: List<TaskListItemDto>,
+        items: MutableList<TaskListItemDto>,
         itemsMap: MutableMap<Long, MutableList<TaskListItemDto>>
     ) {
-        for (item in items) {
+        for ((index, item) in items.withIndex()) {
             if (itemsMap.isEmpty()) {
                 return
             }
@@ -127,7 +129,7 @@ class TaskScreenServiceImpl @Inject constructor(
                 continue
             }
 
-            item.children = itemsMap[item.id]!!
+            items[index] = items[index].copy(children = itemsMap[item.id]!!)
             itemsMap.remove(item.id)
         }
 

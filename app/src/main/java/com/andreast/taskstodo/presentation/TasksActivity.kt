@@ -10,23 +10,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.andreast.taskstodo.application.services.ITaskScreenService
 import com.andreast.taskstodo.presentation.screens.Screen
 import com.andreast.taskstodo.presentation.screens.TASK_ITEM_SCREEN_ROUTE_KEY
-import com.andreast.taskstodo.presentation.screens.TaskItemScreen
-import com.andreast.taskstodo.presentation.screens.TaskScreen
-import com.andreast.taskstodo.presentation.screens.TaskScreenViewModel
+import com.andreast.taskstodo.presentation.screens.TaskListScreen
+import com.andreast.taskstodo.presentation.screens.TaskListScreenViewModel
+import com.andreast.taskstodo.presentation.screens.TaskListsScreen
+import com.andreast.taskstodo.presentation.screens.TaskListsScreenViewModel
 import com.andreast.taskstodo.presentation.ui.theme.TasksToDoTheme
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class TasksActivity : ComponentActivity() {
 
     private lateinit var _navController: NavHostController
-
-    @Inject
-    lateinit var taskScreenService: ITaskScreenService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +38,7 @@ class TasksActivity : ComponentActivity() {
                     composable(
                         route = Screen.TaskScreen.route
                     ) {
-                        TaskScreen(hiltViewModel<TaskScreenViewModel>(), _navController)
+                        TaskListsScreen(hiltViewModel<TaskListsScreenViewModel>(), _navController)
                     }
                     composable(
                         route = Screen.TaskItemScreen.route,
@@ -54,7 +50,14 @@ class TasksActivity : ComponentActivity() {
                         val taskListId =
                             it.arguments?.getString(TASK_ITEM_SCREEN_ROUTE_KEY)?.toLongOrNull()
                         if (taskListId != null) {
-                            TaskItemScreen(taskScreenService, _navController, taskListId)
+                            TaskListScreen(
+                                hiltViewModel<TaskListScreenViewModel, TaskListScreenViewModel.Factory>(
+                                    creationCallback = { factory ->
+                                        factory.create(taskListId = taskListId)
+                                    }
+                                ),
+                                _navController
+                            )
                         }
                     }
                 }
