@@ -5,18 +5,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -26,22 +25,14 @@ private val MIN_WIDTH = 280.dp
 private val MAX_WIDTH = 560.dp
 
 @Composable
-fun InputDialog(
+fun ConfirmDialog(
     label: String,
-    value: String = "",
-    placeholder: String? = null,
+    imageVector: ImageVector? = null,
     onDismissRequest: (() -> Unit)? = null,
-    onConfirmRequest: (value: String) -> Unit,
+    onConfirmRequest: () -> Unit,
     onError: ((ex: Exception) -> Unit)? = null,
     onFinally: (() -> Unit)? = null,
 ) {
-    val fieldValue = remember { mutableStateOf(value) }
-    val keyboard = LocalSoftwareKeyboardController.current
-
-    LaunchedEffect(Unit) {
-        keyboard?.show()
-    }
-
     Dialog(
         onDismissRequest = {
             Try.resolve(
@@ -62,23 +53,24 @@ fun InputDialog(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if (imageVector != null) {
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp)
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .size(40.dp),
+                            imageVector = imageVector,
+                            contentDescription = "Confirmation icon"
+                        )
+                    }
+                }
                 Text(
                     modifier = Modifier.padding(16.dp),
                     text = label,
                     textAlign = TextAlign.Center
                 )
-                Row(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    InputField(
-                        value = fieldValue.value,
-                        placeholder = placeholder,
-                        autoFocus = true,
-                        onValueChange = {
-                            fieldValue.value = it
-                        }
-                    )
-                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -99,7 +91,6 @@ fun InputDialog(
                     TextButton(
                         onClick = {
                             Try.resolve(
-                                result = fieldValue.value,
                                 onSuccess = onConfirmRequest,
                                 onError = onError,
                                 onFinally = onFinally

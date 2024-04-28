@@ -85,9 +85,6 @@ private fun TextFieldDefaults.noBackground(): TextFieldColors {
         focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
         disabledContainerColor = Color.Transparent,
-        errorContainerColor = Color.Transparent,
-        focusedIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-        disabledIndicatorColor = Color.Transparent
+        errorContainerColor = Color.Transparent
     )
 }

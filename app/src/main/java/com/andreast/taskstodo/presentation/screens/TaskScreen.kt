@@ -107,7 +107,7 @@ fun TaskScreen(
             if (isOpen.value) {
                 InputDialog(
                     label = "New List",
-                    placeholder = "Title",
+                    placeholder = "Enter title...",
                     onDismissRequest = {
                         isOpen.value = false
                     },

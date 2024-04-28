@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.andreast.taskstodo.application.dto.TaskListItemDto
+import com.andreast.taskstodo.presentation.components.DropdownDivider
 
 @Composable
 fun RecursiveTaskItemRow(
@@ -98,6 +99,9 @@ fun RecursiveTaskItemRow(
                         isDropdownExpanded.value = false
                     }
                 )
+
+                DropdownDivider()
+
                 DropdownMenuItem(
                     leadingIcon = {
                         Icon(Icons.Filled.Edit, contentDescription = "Edit task")
