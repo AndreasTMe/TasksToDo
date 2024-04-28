@@ -80,6 +80,8 @@ dependencies {
     testImplementation(libs.google.dagger.hilt.android.testing)
     kaptTest(libs.google.dagger.hilt.compiler)
 
+    implementation(libs.androidx.hilt.navigation.compose)
+
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

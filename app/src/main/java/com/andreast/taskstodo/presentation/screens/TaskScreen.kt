@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,18 +29,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.andreast.taskstodo.application.dto.TaskListDto
-import com.andreast.taskstodo.application.services.ITaskScreenService
 import com.andreast.taskstodo.presentation.components.InputDialog
 import kotlinx.coroutines.launch
 
 @Composable
 fun TaskScreen(
-    taskScreenService: ITaskScreenService,
+    taskScreenViewModel: TaskScreenViewModel,
     navHostController: NavHostController
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val taskLists = remember { mutableStateOf<List<TaskListDto>>(listOf()) }
+    val isInputDialogOpen = remember { mutableStateOf(false) }
+
+    val taskListsState = taskScreenViewModel.uiState.collectAsState()
 
     Scaffold(
         content = { padding ->
@@ -49,11 +50,7 @@ fun TaskScreen(
                     .padding(padding)
             ) {
                 LazyVerticalGrid(columns = GridCells.Fixed(3)) {
-                    coroutineScope.launch {
-                        taskLists.value = taskScreenService.getAllTaskLists()
-                    }
-
-                    items(taskLists.value.size) {
+                    items(taskListsState.value.size) {
                         Column(
                             modifier = Modifier
                                 .aspectRatio(1f)
@@ -69,7 +66,7 @@ fun TaskScreen(
                                 )
                                 .clickable {
                                     navHostController.navigate(
-                                        route = Screen.TaskItemScreen.createRoute(taskId = taskLists.value[it].id.toString())
+                                        route = Screen.TaskItemScreen.createRoute(taskId = taskListsState.value[it].id.toString())
                                     )
                                 },
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -82,7 +79,7 @@ fun TaskScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = taskLists.value[it].title ?: "Untitled",
+                                    text = taskListsState.value[it].title,
                                     color = MaterialTheme.colorScheme.inverseSurface,
                                 )
                             }
@@ -92,30 +89,28 @@ fun TaskScreen(
             }
         },
         floatingActionButton = {
-            val isOpen = remember { mutableStateOf(false) }
-
             FloatingActionButton(
                 containerColor = MaterialTheme.colorScheme.primary,
                 content = {
                     Icon(Icons.Filled.Add, contentDescription = "Add Task List")
                 },
                 onClick = {
-                    isOpen.value = !isOpen.value
+                    isInputDialogOpen.value = !isInputDialogOpen.value
                 }
             )
 
-            if (isOpen.value) {
+            if (isInputDialogOpen.value) {
                 InputDialog(
                     label = "New List",
                     placeholder = "Enter title...",
                     onDismissRequest = {
-                        isOpen.value = false
+                        isInputDialogOpen.value = false
                     },
                     onConfirmRequest = {
                         if (it != "") {
                             coroutineScope.launch {
-                                val taskListId =
-                                    taskScreenService.upsertTaskList(TaskListDto(title = it))
+                                val taskListId = taskScreenViewModel.createTaskList(title = it)
+                                assert(taskListId > 0) { "Task list creation returned $taskListId. This should never happen!" }
 
                                 navHostController.navigate(
                                     route = Screen.TaskItemScreen.createRoute(taskListId.toString())
@@ -123,7 +118,7 @@ fun TaskScreen(
                             }
                         }
 
-                        isOpen.value = false
+                        isInputDialogOpen.value = false
                     },
                 )
             }
