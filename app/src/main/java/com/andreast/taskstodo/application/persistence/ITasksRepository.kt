@@ -10,6 +10,7 @@ interface ITasksRepository {
     suspend fun getTaskListItemsByListId(id: Long): List<TaskListItem>
     suspend fun upsertTaskList(taskList: TaskList): Long
     suspend fun upsertTaskListItem(taskListItem: TaskListItem): Long
-    suspend fun updateTaskListItem(taskListItem: InsteadOf<TaskListItem>)
+    suspend fun updateTaskListItems(vararg taskListItems: InsteadOf<TaskListItem>)
+    suspend fun deleteTaskListById(id: Long)
     suspend fun deleteTaskListItemsById(ids: List<Long>)
 }

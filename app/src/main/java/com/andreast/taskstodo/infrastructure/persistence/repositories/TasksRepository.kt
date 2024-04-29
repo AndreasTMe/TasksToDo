@@ -40,13 +40,37 @@ class TasksRepository @Inject constructor(
         return taskListItemDao.upsert(taskListItem)
     }
 
-    override suspend fun updateTaskListItem(taskListItem: InsteadOf<TaskListItem>) {
-        when (taskListItem) {
-            is TaskListItemIdAndParentId -> taskListItemDao.updateParentId(taskListItem)
-            is TaskListItemIdAndTitle -> taskListItemDao.updateTitle(taskListItem)
-            is TaskListItemIdAndOrder -> taskListItemDao.updateOrder(taskListItem)
-            is TaskListItemIdAndIsCompleted -> taskListItemDao.updateIsCompleted(taskListItem)
+    override suspend fun updateTaskListItems(vararg taskListItems: InsteadOf<TaskListItem>) {
+        if (taskListItems.isEmpty()) {
+            return
         }
+
+        when (taskListItems[0]) {
+            is TaskListItemIdAndParentId -> taskListItemDao.updateParentIds(
+                taskListItems[0] as TaskListItemIdAndParentId
+            )
+
+            is TaskListItemIdAndTitle -> taskListItemDao.updateTitles(
+                taskListItems[0] as TaskListItemIdAndTitle
+            )
+
+            is TaskListItemIdAndOrder -> taskListItemDao.updateOrders(
+                taskListItems[0] as TaskListItemIdAndOrder
+            )
+
+            is TaskListItemIdAndIsCompleted -> taskListItemDao.updateCompletedStates(
+                *taskListItems
+                    .map {
+                        it as TaskListItemIdAndIsCompleted
+                    }
+                    .toTypedArray()
+            )
+        }
+    }
+
+    override suspend fun deleteTaskListById(id: Long) {
+        taskListDao.deleteById(id)
+        taskListItemDao.deleteAllByTaskListId(id)
     }
 
     override suspend fun deleteTaskListItemsById(ids: List<Long>) {

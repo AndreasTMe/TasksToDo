@@ -27,17 +27,20 @@ interface TaskListItemDao {
     suspend fun upsert(taskListItem: TaskListItem): Long
 
     @Update(entity = TaskListItem::class)
-    suspend fun updateParentId(taskListItem: TaskListItemIdAndParentId)
+    suspend fun updateParentIds(vararg taskListItems: TaskListItemIdAndParentId)
 
     @Update(entity = TaskListItem::class)
-    suspend fun updateTitle(taskListItem: TaskListItemIdAndTitle)
+    suspend fun updateTitles(vararg taskListItems: TaskListItemIdAndTitle)
 
     @Update(entity = TaskListItem::class)
-    suspend fun updateOrder(taskListItem: TaskListItemIdAndOrder)
+    suspend fun updateOrders(vararg taskListItems: TaskListItemIdAndOrder)
 
     @Update(entity = TaskListItem::class)
-    suspend fun updateIsCompleted(taskListItem: TaskListItemIdAndIsCompleted)
+    suspend fun updateCompletedStates(vararg taskListItems: TaskListItemIdAndIsCompleted)
 
     @Query("DELETE FROM ${TaskListItemTable.NAME} WHERE ${TaskListItemTable.COLUMN_ID} IN (:ids)")
     suspend fun deleteAllById(ids: List<Long>)
+
+    @Query("DELETE FROM ${TaskListItemTable.NAME} WHERE ${TaskListItemTable.COLUMN_TASK_LIST_ID} = :id")
+    suspend fun deleteAllByTaskListId(id: Long)
 }

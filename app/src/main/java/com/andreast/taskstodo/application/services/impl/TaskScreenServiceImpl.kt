@@ -55,27 +55,29 @@ class TaskScreenServiceImpl @Inject constructor(
     }
 
     override suspend fun updateTaskListItemTitle(id: Long, title: String) {
-        repository.updateTaskListItem(
-            TaskListItemMappers.onlyIdAndTitleToEntity(id, title)
-        )
+        repository.updateTaskListItems(TaskListItemMappers.onlyIdAndTitleToEntity(id, title))
     }
 
     override suspend fun updateTaskListItemParentId(id: Long, parentId: Long) {
-        repository.updateTaskListItem(
-            TaskListItemMappers.onlyIdAndParentIdToEntity(id, parentId)
-        )
+        repository.updateTaskListItems(TaskListItemMappers.onlyIdAndParentIdToEntity(id, parentId))
     }
 
     override suspend fun updateTaskListItemOrder(id: Long, order: Int) {
-        repository.updateTaskListItem(
-            TaskListItemMappers.onlyIdAndOrderToEntity(id, order)
+        repository.updateTaskListItems(TaskListItemMappers.onlyIdAndOrderToEntity(id, order))
+    }
+
+    override suspend fun updateTaskListItemsCompletedState(items: List<Pair<Long, Boolean>>) {
+        repository.updateTaskListItems(
+            *items
+                .map {
+                    TaskListItemMappers.onlyIdAndIsCompletedToEntity(it.first, it.second)
+                }
+                .toTypedArray()
         )
     }
 
-    override suspend fun updateTaskListItemCompletedState(id: Long, isCompleted: Boolean) {
-        repository.updateTaskListItem(
-            TaskListItemMappers.onlyIdAndIsCompletedToEntity(id, isCompleted)
-        )
+    override suspend fun deleteTaskListById(id: Long) {
+        repository.deleteTaskListById(id)
     }
 
     override suspend fun deleteTaskListItemsByIds(ids: List<Long>) {

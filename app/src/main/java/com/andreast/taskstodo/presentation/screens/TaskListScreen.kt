@@ -51,10 +51,14 @@ fun TaskListScreen(
                 TaskItemScreenTopBar(
                     title = taskScreenState.value.list.title,
                     onUncheckCompleted = {
-
+                        coroutineScope.launch {
+                            taskListScreenViewModel.handleTaskListUncheckCompleted()
+                        }
                     },
                     onRemoveCompleted = {
-
+                        coroutineScope.launch {
+                            taskListScreenViewModel.handleTaskListRemoveCompleted()
+                        }
                     },
                     onEditTitle = {
                         coroutineScope.launch {
@@ -62,7 +66,14 @@ fun TaskListScreen(
                         }
                     },
                     onDeleteList = {
-
+                        coroutineScope.launch {
+                            navHostController.navigate(route = Screen.TaskScreen.route) {
+                                popUpTo(Screen.TaskScreen.route) {
+                                    inclusive = true
+                                }
+                            }
+                            taskListScreenViewModel.handleTaskListDelete()
+                        }
                     }
                 )
             }

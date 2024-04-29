@@ -1,10 +1,8 @@
 package com.andreast.taskstodo.domain
 
 import androidx.room.ColumnInfo
-import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.Relation
 import com.andreast.taskstodo.application.utils.InsteadOf
 
 object TaskListItemTable {
@@ -71,14 +69,3 @@ data class TaskListItemIdAndIsCompleted(
     @ColumnInfo(name = TaskListItemTable.COLUMN_IS_COMPLETED)
     val isCompleted: Boolean
 ) : InsteadOf<TaskListItem>
-
-data class TaskListWithItems(
-    @Embedded
-    val taskList: TaskList,
-
-    @Relation(
-        parentColumn = TaskListTable.COLUMN_ID,
-        entityColumn = TaskListItemTable.COLUMN_TASK_LIST_ID
-    )
-    val taskListItems: List<TaskListItem>
-)

@@ -19,4 +19,7 @@ interface TaskListDao {
 
     @Upsert
     suspend fun upsert(taskList: TaskList): Long
+
+    @Query("DELETE FROM ${TaskListTable.NAME} WHERE ${TaskListTable.COLUMN_ID} = :id")
+    suspend fun deleteById(id: Long)
 }

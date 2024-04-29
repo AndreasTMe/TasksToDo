@@ -39,6 +39,8 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     private val _uiState = MutableStateFlow(TaskListScreenState())
+    private val _isDeleted = MutableStateFlow(false)
+
     val uiState: StateFlow<TaskListScreenState> = _uiState.asStateFlow()
 
     init {
@@ -48,6 +50,11 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     private suspend fun refreshScreen() {
+        if (_isDeleted.value) {
+            _uiState.value = TaskListScreenState()
+            return
+        }
+
         _uiState.value = TaskListScreenState(
             list = taskScreenService.getTaskListById(taskListId),
             items = taskScreenService.getTaskListItemsByListId(taskListId)
@@ -67,12 +74,37 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListItemCompletedState(id: Long, isCompleted: Boolean) {
-        taskScreenService.updateTaskListItemCompletedState(id, isCompleted)
+        val ids = getParentAndChildrenIds(id)
+        taskScreenService.updateTaskListItemsCompletedState(
+            ids.map { itemId -> itemId to isCompleted }
+        )
+        refreshScreen()
+    }
+
+    suspend fun handleTaskListUncheckCompleted() {
+        val ids = getAllIdsRecursive(_uiState.value.items) { it.isCompleted }
+        taskScreenService.updateTaskListItemsCompletedState(
+            ids.map { itemId -> itemId to false }
+        )
+        refreshScreen()
+    }
+
+    suspend fun handleTaskListRemoveCompleted() {
+        val ids = getAllIdsRecursive(_uiState.value.items) { it.isCompleted }
+        taskScreenService.deleteTaskListItemsByIds(ids)
+        refreshScreen()
+    }
+
+    suspend fun handleTaskListDelete() {
+        taskScreenService.deleteTaskListById(_uiState.value.list.id)
+        _isDeleted.value = true
+        refreshScreen()
     }
 
     suspend fun handleTaskListItemDelete(id: Long) {
         val ids = getParentAndChildrenIds(id)
         taskScreenService.deleteTaskListItemsByIds(ids)
+        refreshScreen()
     }
 
     suspend fun handleTaskListScreenAction(title: String) {
@@ -113,9 +145,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
             return false
         }
 
-        taskScreenService.upsertTaskListItem(
-            _uiState.value.selectedItem!!.copy(title = title)
-        )
+        taskScreenService.updateTaskListItemTitle(_uiState.value.selectedItem!!.id, title)
 
         return true
     }
@@ -128,6 +158,10 @@ class TaskListScreenViewModel @AssistedInject constructor(
 
     private fun calculateOrder(parentId: Long?): Int {
         if (parentId == null) {
+            if (_uiState.value.items.isEmpty()) {
+                return 0
+            }
+
             return _uiState.value.items.maxBy { it.order }.order + 1
         }
 
@@ -154,14 +188,24 @@ class TaskListScreenViewModel @AssistedInject constructor(
         return null
     }
 
-    private fun getAllIdsRecursive(items: List<TaskListItemDto>): List<Long> {
+    private fun getAllIdsRecursive(
+        items: List<TaskListItemDto>,
+        predicate: ((item: TaskListItemDto) -> Boolean)? = null
+    ): List<Long> {
         val itemsList = mutableListOf<Long>()
 
         for (item in items) {
-            itemsList.add(item.id)
+            if (predicate != null) {
+                if (predicate(item)) {
+                    itemsList.add(item.id)
+                }
+            } else {
+                itemsList.add(item.id)
+            }
+
 
             if (item.children.isNotEmpty()) {
-                itemsList.addAll(getAllIdsRecursive(item.children))
+                itemsList.addAll(getAllIdsRecursive(item.children, predicate))
             }
         }
 

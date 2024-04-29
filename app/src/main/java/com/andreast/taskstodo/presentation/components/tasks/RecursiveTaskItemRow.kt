@@ -39,13 +39,7 @@ fun RecursiveTaskItemRow(
     onDeleteTask: (id: Long) -> Unit,
     onAddSubTask: (parent: TaskListItemDto) -> Unit
 ) {
-    val isCompleted = remember { mutableStateOf(task.isCompleted) }
-    val isDeleted = remember { mutableStateOf(false) }
     val isDropdownExpanded = remember { mutableStateOf(false) }
-
-    if (isDeleted.value) {
-        return
-    }
 
     Row(
         modifier = Modifier
@@ -58,9 +52,8 @@ fun RecursiveTaskItemRow(
     ) {
         Checkbox(
             modifier = Modifier.width(40.dp),
-            checked = isCompleted.value,
+            checked = task.isCompleted,
             onCheckedChange = {
-                isCompleted.value = it
                 onCheckTask(task.id, it)
             })
         Text(
@@ -69,7 +62,7 @@ fun RecursiveTaskItemRow(
                 .align(Alignment.CenterVertically),
             text = task.title,
             style = TextStyle(
-                textDecoration = if (isCompleted.value) TextDecoration.LineThrough else TextDecoration.None,
+                textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
             )
         )
         Box {
@@ -119,7 +112,6 @@ fun RecursiveTaskItemRow(
                     text = { Text("Delete task") },
                     onClick = {
                         onDeleteTask(task.id)
-                        isDeleted.value = true
                         isDropdownExpanded.value = false
                     }
                 )
