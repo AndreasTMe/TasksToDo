@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -17,7 +18,7 @@ fun GenericTopHeader(
     afterText: (@Composable () -> Unit)? = null
 ) {
     Row(
-        modifier = Modifier.height(40.dp),
+        modifier = Modifier.height(56.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (beforeText != null) {
@@ -29,7 +30,8 @@ fun GenericTopHeader(
                 .padding(horizontal = 16.dp)
                 .weight(1f),
             text = title,
-            color = MaterialTheme.colorScheme.onPrimary
+            color = MaterialTheme.colorScheme.onPrimary,
+            textAlign = TextAlign.Center
         )
 
         if (afterText != null) {

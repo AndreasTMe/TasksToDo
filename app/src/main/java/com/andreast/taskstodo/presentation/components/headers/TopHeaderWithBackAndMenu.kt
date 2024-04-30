@@ -1,7 +1,7 @@
 package com.andreast.taskstodo.presentation.components.headers
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Icon
@@ -29,7 +29,8 @@ fun TopHeaderWithBackAndMenu(
 
             Box {
                 IconButton(
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier
+                        .height(40.dp),
                     onClick = {
                         onBackClicked()
                     }
@@ -37,17 +38,16 @@ fun TopHeaderWithBackAndMenu(
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        contentDescription = "'$title' Screen Menu"
+                        contentDescription = "'$title' Screen Back Button"
                     )
                 }
-
-                dropdownMenu()
             }
         },
         afterText = {
             Box {
                 IconButton(
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier
+                        .height(40.dp),
                     onClick = {
                         onMenuIconClick()
                     }

@@ -57,7 +57,7 @@ fun TaskListScreenTopHeader(
     ) {
         DropdownMenu(
             expanded = isDropdownExpanded.value,
-            offset = DpOffset(x = (-16).dp, y = 8.dp),
+            offset = DpOffset(x = (-16).dp, y = 0.dp),
             onDismissRequest = {
                 isDropdownExpanded.value = false
             }
