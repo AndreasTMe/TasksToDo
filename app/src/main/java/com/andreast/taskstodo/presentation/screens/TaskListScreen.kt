@@ -28,7 +28,7 @@ import androidx.navigation.NavHostController
 import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.presentation.components.InputDialog
 import com.andreast.taskstodo.presentation.components.tasks.RecursiveTaskItemRow
-import com.andreast.taskstodo.presentation.components.tasks.TaskItemScreenTopBar
+import com.andreast.taskstodo.presentation.components.tasks.TaskListScreenTopHeader
 import kotlinx.coroutines.launch
 
 @Composable
@@ -48,8 +48,15 @@ fun TaskListScreen(
                     .fillMaxWidth()
                     .background(color = MaterialTheme.colorScheme.primary)
             ) {
-                TaskItemScreenTopBar(
+                TaskListScreenTopHeader(
                     title = taskScreenState.value.list.title,
+                    onBackClicked = {
+                        navHostController.navigate(route = Screen.TaskListsScreen.route) {
+                            popUpTo(Screen.TaskListsScreen.route) {
+                                inclusive = true
+                            }
+                        }
+                    },
                     onUncheckCompleted = {
                         coroutineScope.launch {
                             taskListScreenViewModel.handleTaskListUncheckCompleted()
@@ -67,8 +74,8 @@ fun TaskListScreen(
                     },
                     onDeleteList = {
                         coroutineScope.launch {
-                            navHostController.navigate(route = Screen.TaskScreen.route) {
-                                popUpTo(Screen.TaskScreen.route) {
+                            navHostController.navigate(route = Screen.TaskListsScreen.route) {
+                                popUpTo(Screen.TaskListsScreen.route) {
                                     inclusive = true
                                 }
                             }
@@ -155,8 +162,8 @@ fun TaskListScreen(
     )
 
     BackHandler {
-        navHostController.navigate(route = Screen.TaskScreen.route) {
-            popUpTo(Screen.TaskScreen.route) {
+        navHostController.navigate(route = Screen.TaskListsScreen.route) {
+            popUpTo(Screen.TaskListsScreen.route) {
                 inclusive = true
             }
         }

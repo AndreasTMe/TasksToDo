@@ -11,7 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.andreast.taskstodo.presentation.screens.Screen
-import com.andreast.taskstodo.presentation.screens.TASK_ITEM_SCREEN_ROUTE_KEY
+import com.andreast.taskstodo.presentation.screens.TASK_LIST_SCREEN_ROUTE_KEY
 import com.andreast.taskstodo.presentation.screens.TaskListScreen
 import com.andreast.taskstodo.presentation.screens.TaskListScreenViewModel
 import com.andreast.taskstodo.presentation.screens.TaskListsScreen
@@ -33,22 +33,22 @@ class TasksActivity : ComponentActivity() {
 
                 NavHost(
                     navController = _navController,
-                    startDestination = Screen.TaskScreen.route
+                    startDestination = Screen.TaskListsScreen.route
                 ) {
                     composable(
-                        route = Screen.TaskScreen.route
+                        route = Screen.TaskListsScreen.route
                     ) {
                         TaskListsScreen(hiltViewModel<TaskListsScreenViewModel>(), _navController)
                     }
                     composable(
-                        route = Screen.TaskItemScreen.route,
-                        arguments = listOf(navArgument(TASK_ITEM_SCREEN_ROUTE_KEY) {
+                        route = Screen.TaskListScreen.route,
+                        arguments = listOf(navArgument(TASK_LIST_SCREEN_ROUTE_KEY) {
                             type = NavType.StringType
                             defaultValue = ""
                         })
                     ) {
                         val taskListId =
-                            it.arguments?.getString(TASK_ITEM_SCREEN_ROUTE_KEY)?.toLongOrNull()
+                            it.arguments?.getString(TASK_LIST_SCREEN_ROUTE_KEY)?.toLongOrNull()
                         if (taskListId != null) {
                             TaskListScreen(
                                 hiltViewModel<TaskListScreenViewModel, TaskListScreenViewModel.Factory>(

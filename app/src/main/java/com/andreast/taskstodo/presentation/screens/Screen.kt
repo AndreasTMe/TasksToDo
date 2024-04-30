@@ -1,15 +1,15 @@
 package com.andreast.taskstodo.presentation.screens
 
-const val TASK_ITEM_SCREEN_ROUTE_KEY = "taskId"
+const val TASK_LIST_SCREEN_ROUTE_KEY = "taskListId"
 
 sealed class Screen(val route: String) {
-    data object TaskScreen : Screen(route = "task_screen")
-    data object TaskItemScreen : Screen(
-        route = "task_item_screen?id={$TASK_ITEM_SCREEN_ROUTE_KEY}"
+    data object TaskListsScreen : Screen(route = "task_lists_screen")
+    data object TaskListScreen : Screen(
+        route = "task_list_screen?id={$TASK_LIST_SCREEN_ROUTE_KEY}"
     ) {
-        fun createRoute(taskId: String): String {
-            assert(taskId.isNotEmpty())
-            return route.replace("{$TASK_ITEM_SCREEN_ROUTE_KEY}", taskId)
+        fun createRoute(taskListId: String): String {
+            assert(taskListId.isNotEmpty())
+            return route.replace("{$TASK_LIST_SCREEN_ROUTE_KEY}", taskListId)
         }
     }
 }

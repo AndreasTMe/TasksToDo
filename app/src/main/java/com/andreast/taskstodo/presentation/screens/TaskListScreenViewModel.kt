@@ -69,7 +69,13 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListTitleChange(title: String) {
-        taskScreenService.upsertTaskList(_uiState.value.list.copy(title = title))
+        val titleNoWhitespace = title.trim()
+
+        if (titleNoWhitespace == "") {
+            return
+        }
+
+        taskScreenService.upsertTaskList(_uiState.value.list.copy(title = titleNoWhitespace))
         refreshScreen()
     }
 
@@ -108,20 +114,22 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListScreenAction(title: String) {
-        if (title == "") {
+        val titleNoWhitespace = title.trim()
+
+        if (titleNoWhitespace == "") {
             return
         }
 
         if (_uiState.value.screenAction == TaskListScreenAction.EditTask
             && _uiState.value.selectedItem != null
         ) {
-            if (_uiState.value.selectedItem!!.title == title) {
+            if (_uiState.value.selectedItem!!.title == titleNoWhitespace) {
                 return
             }
 
-            handleTaskListItemEdit(title)
+            handleTaskListItemEdit(titleNoWhitespace)
         } else {
-            handleTaskListItemAdd(title)
+            handleTaskListItemAdd(titleNoWhitespace)
         }
 
         refreshScreen()

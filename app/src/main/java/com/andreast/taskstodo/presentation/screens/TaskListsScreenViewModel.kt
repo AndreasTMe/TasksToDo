@@ -11,13 +11,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class TaskListsScreenState(
+    val lists: List<TaskListDto> = listOf(),
+    val isHolding: Boolean = false
+)
+
 @HiltViewModel
 class TaskListsScreenViewModel @Inject constructor(
     private val taskScreenService: ITaskScreenService
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(listOf<TaskListDto>())
-    val uiState: StateFlow<List<TaskListDto>> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(TaskListsScreenState())
+    val uiState: StateFlow<TaskListsScreenState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -30,6 +35,8 @@ class TaskListsScreenViewModel @Inject constructor(
     }
 
     private suspend fun refreshScreen() {
-        _uiState.value = taskScreenService.getAllTaskLists()
+        _uiState.value = TaskListsScreenState(
+            lists = taskScreenService.getAllTaskLists()
+        )
     }
 }

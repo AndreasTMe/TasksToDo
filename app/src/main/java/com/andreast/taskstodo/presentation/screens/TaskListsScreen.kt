@@ -3,11 +3,13 @@ package com.andreast.taskstodo.presentation.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -27,9 +29,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.andreast.taskstodo.presentation.components.InputDialog
+import com.andreast.taskstodo.presentation.components.tasks.TaskListsScreenTopHeader
 import kotlinx.coroutines.launch
 
 @Composable
@@ -37,12 +41,21 @@ fun TaskListsScreen(
     taskListsScreenViewModel: TaskListsScreenViewModel,
     navHostController: NavHostController
 ) {
-    val taskScreenState = taskListsScreenViewModel.uiState.collectAsState()
+    val taskListsScreenState = taskListsScreenViewModel.uiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     val isInputDialogOpen = remember { mutableStateOf(false) }
 
     Scaffold(
+        topBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = MaterialTheme.colorScheme.primary)
+            ) {
+                TaskListsScreenTopHeader(title = "All Task Lists")
+            }
+        },
         content = { padding ->
             Box(
                 modifier = Modifier
@@ -50,7 +63,7 @@ fun TaskListsScreen(
                     .padding(padding)
             ) {
                 LazyVerticalGrid(columns = GridCells.Fixed(3)) {
-                    items(taskScreenState.value.size) {
+                    items(taskListsScreenState.value.lists.size) {
                         Column(
                             modifier = Modifier
                                 .aspectRatio(1f)
@@ -66,7 +79,23 @@ fun TaskListsScreen(
                                 )
                                 .clickable {
                                     navHostController.navigate(
-                                        route = Screen.TaskItemScreen.createRoute(taskId = taskScreenState.value[it].id.toString())
+                                        route = Screen.TaskListScreen.createRoute(taskListId = taskListsScreenState.value.lists[it].id.toString())
+                                    )
+                                }
+                                .pointerInput(Unit) {
+                                    detectDragGesturesAfterLongPress(
+                                        onDrag = { change, offset ->
+
+                                        },
+                                        onDragStart = { offset ->
+
+                                        },
+                                        onDragEnd = {
+
+                                        },
+                                        onDragCancel = {
+
+                                        }
                                     )
                                 },
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -79,7 +108,7 @@ fun TaskListsScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = taskScreenState.value[it].title,
+                                    text = taskListsScreenState.value.lists[it].title,
                                     color = MaterialTheme.colorScheme.inverseSurface,
                                 )
                             }
@@ -103,23 +132,24 @@ fun TaskListsScreen(
                 InputDialog(
                     label = "New List",
                     placeholder = "Enter title...",
-                    onDismissRequest = {
-                        isInputDialogOpen.value = false
-                    },
                     onConfirmRequest = {
-                        if (it != "") {
-                            coroutineScope.launch {
-                                val taskListId = taskListsScreenViewModel.handleTaskListTitleChange(title = it)
-                                assert(taskListId > 0) { "Task list creation returned $taskListId. This should never happen!" }
-
-                                navHostController.navigate(
-                                    route = Screen.TaskItemScreen.createRoute(taskListId.toString())
-                                )
-                            }
+                        if (it == "") {
+                            return@InputDialog
                         }
 
-                        isInputDialogOpen.value = false
+                        coroutineScope.launch {
+                            val taskListId =
+                                taskListsScreenViewModel.handleTaskListTitleChange(title = it)
+                            assert(taskListId > 0) { "Task list creation returned $taskListId. This should never happen!" }
+
+                            navHostController.navigate(
+                                route = Screen.TaskListScreen.createRoute(taskListId.toString())
+                            )
+                        }
                     },
+                    onFinally = {
+                        isInputDialogOpen.value = false
+                    }
                 )
             }
         }
