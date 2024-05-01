@@ -5,96 +5,64 @@ import kotlinx.coroutines.coroutineScope
 sealed class Try {
     companion object {
         fun resolve(
-            onSuccess: (() -> Unit)? = null,
-            onError: ((ex: Exception) -> Unit)? = null,
-            onFinally: (() -> Unit)? = null,
+            onSuccess: () -> Unit = { },
+            onError: (ex: Exception) -> Unit = { },
+            onFinally: () -> Unit = { },
         ) {
-            assert(onSuccess != null || onError != null || onFinally != null)
-
             try {
-                if (onSuccess != null) {
-                    onSuccess()
-                }
+                onSuccess()
             } catch (ex: Exception) {
-                if (onError != null) {
-                    onError(ex)
-                }
+                onError(ex)
             } finally {
-                if (onFinally != null) {
-                    onFinally()
-                }
+                onFinally()
             }
         }
 
         suspend fun resolveAsync(
-            onSuccess: (() -> Unit)? = null,
-            onError: ((ex: Exception) -> Unit)? = null,
-            onFinally: (() -> Unit)? = null,
+            onSuccess: () -> Unit = { },
+            onError: (ex: Exception) -> Unit = { },
+            onFinally: () -> Unit = { },
         ) {
-            assert(onSuccess != null || onError != null || onFinally != null)
-
             try {
-                if (onSuccess != null) {
-                    coroutineScope {
-                        onSuccess()
-                    }
+                coroutineScope {
+                    onSuccess()
                 }
             } catch (ex: Exception) {
-                if (onError != null) {
-                    onError(ex)
-                }
+                onError(ex)
             } finally {
-                if (onFinally != null) {
-                    onFinally()
-                }
+                onFinally()
             }
         }
 
         fun <R> resolve(
             result: R,
-            onSuccess: ((result: R) -> Unit)? = null,
-            onError: ((ex: Exception) -> Unit)? = null,
-            onFinally: (() -> Unit)? = null,
+            onSuccess: (result: R) -> Unit = { },
+            onError: (ex: Exception) -> Unit = { },
+            onFinally: () -> Unit = { },
         ) {
-            assert(onSuccess != null || onError != null || onFinally != null)
-
             try {
-                if (onSuccess != null) {
-                    onSuccess(result)
-                }
+                onSuccess(result)
             } catch (ex: Exception) {
-                if (onError != null) {
-                    onError(ex)
-                }
+                onError(ex)
             } finally {
-                if (onFinally != null) {
-                    onFinally()
-                }
+                onFinally()
             }
         }
 
         suspend fun <R> resolveAsync(
             result: R,
-            onSuccess: ((result: R) -> Unit)? = null,
-            onError: ((ex: Exception) -> Unit)? = null,
-            onFinally: (() -> Unit)? = null,
+            onSuccess: (result: R) -> Unit = { },
+            onError: (ex: Exception) -> Unit = { },
+            onFinally: () -> Unit = { },
         ) {
-            assert(onSuccess != null || onError != null || onFinally != null)
-
             try {
-                if (onSuccess != null) {
-                    coroutineScope {
-                        onSuccess(result)
-                    }
+                coroutineScope {
+                    onSuccess(result)
                 }
             } catch (ex: Exception) {
-                if (onError != null) {
-                    onError(ex)
-                }
+                onError(ex)
             } finally {
-                if (onFinally != null) {
-                    onFinally()
-                }
+                onFinally()
             }
         }
     }

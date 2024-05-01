@@ -14,16 +14,14 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun GenericTopHeader(
     title: String,
-    beforeText: (@Composable () -> Unit)? = null,
-    afterText: (@Composable () -> Unit)? = null
+    beforeText: @Composable () -> Unit = { },
+    afterText: @Composable () -> Unit = { }
 ) {
     Row(
         modifier = Modifier.height(56.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (beforeText != null) {
-            beforeText()
-        }
+        beforeText()
 
         Text(
             modifier = Modifier
@@ -34,8 +32,6 @@ fun GenericTopHeader(
             textAlign = TextAlign.Center
         )
 
-        if (afterText != null) {
-            afterText()
-        }
+        afterText()
     }
 }

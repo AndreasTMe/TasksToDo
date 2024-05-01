@@ -28,10 +28,10 @@ private val MAX_WIDTH = 560.dp
 fun ConfirmDialog(
     label: String,
     imageVector: ImageVector? = null,
-    onDismissRequest: (() -> Unit)? = null,
+    onDismissRequest: () -> Unit = { },
     onConfirmRequest: () -> Unit,
-    onError: ((ex: Exception) -> Unit)? = null,
-    onFinally: (() -> Unit)? = null,
+    onError: (ex: Exception) -> Unit = { },
+    onFinally: () -> Unit = { },
 ) {
     Dialog(
         onDismissRequest = {

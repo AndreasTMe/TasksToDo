@@ -30,10 +30,10 @@ fun InputDialog(
     label: String,
     value: String = "",
     placeholder: String? = null,
-    onDismissRequest: (() -> Unit)? = null,
+    onDismissRequest: () -> Unit = { },
     onConfirmRequest: (value: String) -> Unit,
-    onError: ((ex: Exception) -> Unit)? = null,
-    onFinally: (() -> Unit)? = null,
+    onError: (ex: Exception) -> Unit = { },
+    onFinally: () -> Unit = { }
 ) {
     val fieldValue = remember { mutableStateOf(value) }
     val keyboard = LocalSoftwareKeyboardController.current

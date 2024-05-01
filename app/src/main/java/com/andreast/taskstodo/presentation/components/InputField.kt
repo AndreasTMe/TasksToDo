@@ -24,12 +24,12 @@ import kotlinx.coroutines.android.awaitFrame
 
 @Composable
 fun InputField(
-    label: @Composable (() -> Unit)? = null,
+    label: @Composable () -> Unit = { },
     value: String,
     placeholder: String? = null,
     autoFocus: Boolean = false,
-    onValueChange: ((value: String) -> Unit)? = null,
-    onFocusChange: ((state: FocusState, valueChanged: Boolean) -> Unit)? = null,
+    onValueChange: (value: String) -> Unit = { },
+    onFocusChange: (state: FocusState, valueChanged: Boolean) -> Unit = { _, _ -> }
 ) {
     val valueState = rememberSaveable(value, stateSaver = TextFieldValue.Saver) {
         mutableStateOf(
@@ -53,10 +53,8 @@ fun InputField(
             .focusable()
             .focusRequester(focusRequester)
             .onFocusChanged {
-                if (onFocusChange != null) {
-                    onFocusChange(it, valueChanged.value)
-                    valueChanged.value = false
-                }
+                onFocusChange(it, valueChanged.value)
+                valueChanged.value = false
             },
         value = valueState.value,
         label = label,
@@ -70,11 +68,9 @@ fun InputField(
         },
         colors = TextFieldDefaults.noBackground(),
         onValueChange = {
-            if (onValueChange != null) {
-                valueState.value = it
-                valueChanged.value = true
-                onValueChange(it.text)
-            }
+            valueState.value = it
+            valueChanged.value = true
+            onValueChange(it.text)
         },
     )
 }

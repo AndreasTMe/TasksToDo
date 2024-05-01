@@ -198,19 +198,14 @@ class TaskListScreenViewModel @AssistedInject constructor(
 
     private fun getAllIdsRecursive(
         items: List<TaskListItemDto>,
-        predicate: ((item: TaskListItemDto) -> Boolean)? = null
+        predicate: (item: TaskListItemDto) -> Boolean = { false }
     ): List<Long> {
         val itemsList = mutableListOf<Long>()
 
         for (item in items) {
-            if (predicate != null) {
-                if (predicate(item)) {
-                    itemsList.add(item.id)
-                }
-            } else {
+            if (predicate(item)) {
                 itemsList.add(item.id)
             }
-
 
             if (item.children.isNotEmpty()) {
                 itemsList.addAll(getAllIdsRecursive(item.children, predicate))

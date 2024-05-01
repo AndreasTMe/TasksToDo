@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun TopHeaderWithBackAndMenu(
     title: String,
-    onBackClicked: (() -> Unit)? = null,
+    onBackClicked: () -> Unit = {},
     menuImageVector: ImageVector,
     onMenuIconClick: () -> Unit,
     dropdownMenu: @Composable () -> Unit,
@@ -23,10 +23,6 @@ fun TopHeaderWithBackAndMenu(
     GenericTopHeader(
         title = title,
         beforeText = {
-            if (onBackClicked == null) {
-                return@GenericTopHeader
-            }
-
             Box {
                 IconButton(
                     modifier = Modifier
