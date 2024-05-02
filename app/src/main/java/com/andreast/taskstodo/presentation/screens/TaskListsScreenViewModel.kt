@@ -38,4 +38,13 @@ class TaskListsScreenViewModel @Inject constructor(
             lists = taskScreenService.getAllTaskLists()
         )
     }
+
+    suspend fun handleTaskListDelete(id: Long) {
+        if (_uiState.value.lists.none { it.id == id }) {
+            return
+        }
+
+        taskScreenService.deleteTaskListById(id)
+        refreshScreen()
+    }
 }

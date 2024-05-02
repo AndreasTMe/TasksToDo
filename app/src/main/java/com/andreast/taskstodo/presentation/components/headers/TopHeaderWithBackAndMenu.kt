@@ -6,7 +6,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -33,7 +32,6 @@ fun TopHeaderWithBackAndMenu(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        tint = MaterialTheme.colorScheme.onPrimary,
                         contentDescription = "'$title' Screen Back Button"
                     )
                 }
@@ -50,7 +48,6 @@ fun TopHeaderWithBackAndMenu(
                 ) {
                     Icon(
                         imageVector = menuImageVector,
-                        tint = MaterialTheme.colorScheme.onPrimary,
                         contentDescription = "'$title' Screen Menu"
                     )
                 }

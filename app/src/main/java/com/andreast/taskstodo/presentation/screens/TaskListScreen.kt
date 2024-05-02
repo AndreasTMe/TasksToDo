@@ -1,7 +1,6 @@
 package com.andreast.taskstodo.presentation.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.presentation.components.InputDialog
-import com.andreast.taskstodo.presentation.components.tasks.RecursiveTaskItemRow
+import com.andreast.taskstodo.presentation.components.tasks.RecursiveTaskRow
 import com.andreast.taskstodo.presentation.components.tasks.TaskListScreenTopHeader
 import kotlinx.coroutines.launch
 
@@ -46,13 +44,12 @@ fun TaskListScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(color = MaterialTheme.colorScheme.primary)
             ) {
                 TaskListScreenTopHeader(
                     title = taskScreenState.value.list.title,
                     onBackClicked = {
-                        navHostController.navigate(route = Screen.TaskListsScreen.route) {
-                            popUpTo(Screen.TaskListsScreen.route) {
+                        navHostController.navigate(route = ScreenInfo.TaskListsScreen.route) {
+                            popUpTo(ScreenInfo.TaskListsScreen.route) {
                                 inclusive = true
                             }
                         }
@@ -74,8 +71,8 @@ fun TaskListScreen(
                     },
                     onDeleteList = {
                         coroutineScope.launch {
-                            navHostController.navigate(route = Screen.TaskListsScreen.route) {
-                                popUpTo(Screen.TaskListsScreen.route) {
+                            navHostController.navigate(route = ScreenInfo.TaskListsScreen.route) {
+                                popUpTo(ScreenInfo.TaskListsScreen.route) {
                                     inclusive = true
                                 }
                             }
@@ -99,7 +96,7 @@ fun TaskListScreen(
                     Box {
                         LazyColumn {
                             items(taskScreenState.value.items.size) { it ->
-                                RecursiveTaskItemRow(
+                                RecursiveTaskRow(
                                     task = taskScreenState.value.items[it],
                                     onCheckTask = { id, isChecked ->
                                         coroutineScope.launch {
@@ -162,8 +159,8 @@ fun TaskListScreen(
     )
 
     BackHandler {
-        navHostController.navigate(route = Screen.TaskListsScreen.route) {
-            popUpTo(Screen.TaskListsScreen.route) {
+        navHostController.navigate(route = ScreenInfo.TaskListsScreen.route) {
+            popUpTo(ScreenInfo.TaskListsScreen.route) {
                 inclusive = true
             }
         }

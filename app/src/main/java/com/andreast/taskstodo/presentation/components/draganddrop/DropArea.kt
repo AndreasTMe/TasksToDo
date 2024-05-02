@@ -13,7 +13,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 fun <T> DropArea(
     modifier: Modifier = Modifier,
     dragState: DragState<T>,
-    content: @Composable BoxScope.(data: T?) -> Unit
+    content: @Composable BoxScope.(canDrop: Boolean, data: T?) -> Unit
 ) {
     val position = dragState.position
     val offset = dragState.offset
@@ -22,14 +22,14 @@ fun <T> DropArea(
     Box(
         modifier = modifier
             .onGloballyPositioned { coordinates ->
-                coordinates.boundsInWindow().let { rect ->
-                    isCurrentDropTarget.value = rect.contains(position + offset)
+                coordinates.boundsInWindow().let { block ->
+                    isCurrentDropTarget.value = block.contains(position + offset)
                 }
             }
     ) {
         val data =
             if (isCurrentDropTarget.value && !dragState.isDragging) dragState.dropData else null
 
-        content(data)
+        content(isCurrentDropTarget.value, data)
     }
 }

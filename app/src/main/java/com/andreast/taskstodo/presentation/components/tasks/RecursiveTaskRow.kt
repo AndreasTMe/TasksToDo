@@ -1,8 +1,5 @@
 package com.andreast.taskstodo.presentation.components.tasks
 
-import androidx.compose.foundation.gestures.DraggableState
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,7 +29,7 @@ import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.presentation.components.DropdownDivider
 
 @Composable
-fun RecursiveTaskItemRow(
+fun RecursiveTaskRow(
     task: TaskListItemDto,
     onCheckTask: (id: Long, isChecked: Boolean) -> Unit,
     onEditTask: (taskToEdit: TaskListItemDto) -> Unit,
@@ -41,15 +38,7 @@ fun RecursiveTaskItemRow(
 ) {
     val isDropdownExpanded = remember { mutableStateOf(false) }
 
-    Row(
-        modifier = Modifier
-            .draggable(
-                orientation = Orientation.Horizontal,
-                state = DraggableState { /*TODO*/ },
-                onDragStarted = {},
-                onDragStopped = {}
-            )
-    ) {
+    Row {
         Checkbox(
             modifier = Modifier.width(40.dp),
             checked = task.isCompleted,
@@ -125,7 +114,7 @@ fun RecursiveTaskItemRow(
                 .padding(start = 30.dp)
         ) {
             for (child in task.children) {
-                RecursiveTaskItemRow(
+                RecursiveTaskRow(
                     child,
                     onCheckTask,
                     onEditTask,

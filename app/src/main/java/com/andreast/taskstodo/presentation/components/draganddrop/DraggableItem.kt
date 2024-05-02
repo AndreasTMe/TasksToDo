@@ -34,7 +34,7 @@ fun <T> DraggableItem(
                         state.value = state.value.copy(
                             isDragging = true,
                             position = position.value + offset,
-                            composable = content,
+                            preview = content,
                             dropData = dropData
                         )
 
@@ -42,14 +42,18 @@ fun <T> DraggableItem(
                     },
                     onDragEnd = {
                         state.value = state.value.copy(
-                            isDragging = false
+                            isDragging = false,
+                            position = Offset.Zero,
+                            offset = Offset.Zero
                         )
 
                         onDragEnd(state.value)
                     },
                     onDragCancel = {
                         state.value = state.value.copy(
-                            isDragging = false
+                            isDragging = false,
+                            position = Offset.Zero,
+                            offset = Offset.Zero
                         )
 
                         onDragCancel(state.value)

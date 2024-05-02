@@ -7,6 +7,6 @@ data class DragState<T>(
     val isDragging: Boolean = false,
     val position: Offset = Offset.Zero,
     val offset: Offset = Offset.Zero,
-    val composable: @Composable () -> Unit = { },
+    val preview: @Composable () -> Unit = { },
     val dropData: T? = null
 )

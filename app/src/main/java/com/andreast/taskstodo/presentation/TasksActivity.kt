@@ -10,7 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.andreast.taskstodo.presentation.screens.Screen
+import com.andreast.taskstodo.presentation.screens.ScreenInfo
 import com.andreast.taskstodo.presentation.screens.TASK_LIST_SCREEN_ROUTE_KEY
 import com.andreast.taskstodo.presentation.screens.TaskListScreen
 import com.andreast.taskstodo.presentation.screens.TaskListScreenViewModel
@@ -33,15 +33,15 @@ class TasksActivity : ComponentActivity() {
 
                 NavHost(
                     navController = _navController,
-                    startDestination = Screen.TaskListsScreen.route
+                    startDestination = ScreenInfo.TaskListsScreen.route
                 ) {
                     composable(
-                        route = Screen.TaskListsScreen.route
+                        route = ScreenInfo.TaskListsScreen.route
                     ) {
                         TaskListsScreen(hiltViewModel<TaskListsScreenViewModel>(), _navController)
                     }
                     composable(
-                        route = Screen.TaskListScreen.route,
+                        route = ScreenInfo.TaskListScreen.route,
                         arguments = listOf(navArgument(TASK_LIST_SCREEN_ROUTE_KEY) {
                             type = NavType.StringType
                             defaultValue = ""
