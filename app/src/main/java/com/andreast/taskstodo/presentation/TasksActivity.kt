@@ -16,7 +16,7 @@ import com.andreast.taskstodo.presentation.screens.TaskListScreen
 import com.andreast.taskstodo.presentation.screens.TaskListScreenViewModel
 import com.andreast.taskstodo.presentation.screens.TaskListsScreen
 import com.andreast.taskstodo.presentation.screens.TaskListsScreenViewModel
-import com.andreast.taskstodo.presentation.ui.theme.TasksToDoTheme
+import com.andreast.taskstodo.presentation.theme.TasksToDoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
