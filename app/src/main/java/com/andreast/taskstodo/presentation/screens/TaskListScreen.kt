@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -141,6 +142,7 @@ fun TaskListScreen(
             ) {
                 Button(
                     modifier = Modifier
+                        .height(56.dp)
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     onClick = {
@@ -168,10 +170,11 @@ fun TaskListScreen(
 
     if (isDialogOpen.value) {
         InputDialog(
-            label = getDialogLabel(
+            header = getDialogLabel(
                 taskScreenState.value.screenAction,
                 taskScreenState.value.selectedItem != null
             ),
+            label = "Title",
             value = getDialogValue(
                 taskScreenState.value.screenAction,
                 taskScreenState.value.selectedItem

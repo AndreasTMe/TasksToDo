@@ -14,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.andreast.taskstodo.presentation.components.ConfirmDialog
@@ -62,7 +61,7 @@ fun TaskListScreenTopHeader(
                 isDropdownExpanded.value = false
             }
         ) {
-            DropdownMenuSubtitle(text = "Items", color = Color.Gray)
+            DropdownMenuSubtitle(text = "Items")
             DropdownMenuItem(
                 leadingIcon = {
                     Icon(Icons.Filled.Refresh, contentDescription = "Uncheck completed")
@@ -88,7 +87,7 @@ fun TaskListScreenTopHeader(
 
             DropdownDivider()
 
-            DropdownMenuSubtitle(text = "List", color = Color.Gray)
+            DropdownMenuSubtitle(text = "List")
             DropdownMenuItem(
                 leadingIcon = {
                     Icon(Icons.Filled.Edit, contentDescription = "Edit list title")
@@ -116,7 +115,8 @@ fun TaskListScreenTopHeader(
 
     if (isInputDialogOpen.value) {
         InputDialog(
-            label = getDialogLabel(menuActionState.value),
+            header = getDialogLabel(menuActionState.value),
+            label = "Title",
             value = title,
             placeholder = "Enter title...",
             onConfirmRequest = {

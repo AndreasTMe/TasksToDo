@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -27,6 +28,7 @@ private val MAX_WIDTH = 560.dp
 
 @Composable
 fun InputDialog(
+    header: String,
     label: String,
     value: String = "",
     placeholder: String? = null,
@@ -64,15 +66,27 @@ fun InputDialog(
             ) {
                 Text(
                     modifier = Modifier.padding(16.dp),
-                    text = label,
+                    text = header,
                     textAlign = TextAlign.Center
                 )
                 Row(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     InputField(
+                        label = {
+                            Text(text = label)
+                        },
                         value = fieldValue.value,
-                        placeholder = placeholder,
+                        placeholder = {
+                            if (placeholder == null) {
+                                return@InputField
+                            }
+
+                            Text(
+                                text = placeholder,
+                                fontStyle = FontStyle.Italic
+                            )
+                        },
                         autoFocus = true,
                         onValueChange = {
                             fieldValue.value = it

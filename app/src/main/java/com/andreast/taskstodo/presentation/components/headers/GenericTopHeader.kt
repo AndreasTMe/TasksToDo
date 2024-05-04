@@ -27,7 +27,7 @@ fun GenericTopHeader(
                 .padding(horizontal = 16.dp)
                 .weight(1f),
             text = title,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Start
         )
 
         afterText()
