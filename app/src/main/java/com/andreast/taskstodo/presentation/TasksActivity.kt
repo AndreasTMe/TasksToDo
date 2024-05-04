@@ -26,7 +26,6 @@ class TasksActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             TasksToDoTheme {
                 _navController = rememberNavController()

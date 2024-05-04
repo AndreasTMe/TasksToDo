@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -51,6 +50,7 @@ import com.andreast.taskstodo.presentation.components.draganddrop.DragState
 import com.andreast.taskstodo.presentation.components.draganddrop.DraggableItem
 import com.andreast.taskstodo.presentation.components.draganddrop.DropArea
 import com.andreast.taskstodo.presentation.components.tasks.TaskListsScreenTopHeader
+import com.andreast.taskstodo.presentation.theme.ThemeContext
 import kotlinx.coroutines.launch
 
 @Composable
@@ -77,6 +77,8 @@ fun TaskListsScreen(
     val dropItemAlpha = 0.8f
 
     Scaffold(
+        containerColor = ThemeContext.colors.background,
+        contentColor = ThemeContext.colors.onBackground,
         topBar = {
             Box(
                 modifier = Modifier
@@ -203,6 +205,8 @@ fun TaskListsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
+                containerColor = ThemeContext.colors.primaryContainer,
+                contentColor = ThemeContext.colors.onPrimaryContainer,
                 content = {
                     Icon(
                         modifier = Modifier
@@ -282,100 +286,4 @@ fun TaskListsScreen(
             }
         )
     }
-}
-
-@Preview
-@Composable
-fun TaskListsScreenPreview() {
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp
-
-    val cellsPerRow = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 3 else 2
-
-    val itemPadding = 8
-    val itemEdge = (screenWidth / cellsPerRow - 2 * itemPadding).toFloat()
-    val itemSize = Size(itemEdge, itemEdge)
-
-    val lists = listOf(
-        TaskListDto(1, "Test 1"),
-        TaskListDto(2, "Test 2"),
-        TaskListDto(3, "Test 3"),
-        TaskListDto(4, "Test 4"),
-        TaskListDto(5, "Test 5")
-    )
-
-    Scaffold(
-        topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                TaskListsScreenTopHeader(title = "All Task Lists")
-            }
-        },
-        content = { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(padding)
-            ) {
-                LazyVerticalGrid(
-                    modifier = Modifier
-                        .weight(1f),
-                    columns = GridCells.Fixed(2)
-                ) {
-                    items(
-                        count = lists.size,
-                        key = { index -> lists[index].id }
-                    ) { index ->
-                        DraggableItem(
-                            dropData = lists[index],
-                            onDrag = { state ->
-                            },
-                            onDragStart = { state ->
-                            },
-                            onDragEnd = { state ->
-                            },
-                            onDragCancel = { state ->
-                            }
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .padding(itemPadding.dp)
-                                    .size(itemSize.width.dp, itemSize.height.dp)
-                                    .border(
-                                        width = 2.dp,
-                                        color = Color.Gray,
-                                        shape = MaterialTheme.shapes.small
-                                    )
-                                    .background(
-                                        color = Color.White,
-                                        shape = MaterialTheme.shapes.small
-                                    )
-                                    .align(Alignment.CenterHorizontally),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = lists[index].title
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                content = {
-                    Icon(
-                        modifier = Modifier
-                            .size(36.dp),
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Add Task List"
-                    )
-                },
-                onClick = { }
-            )
-        }
-    )
 }
