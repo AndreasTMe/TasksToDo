@@ -1,5 +1,7 @@
 package com.andreast.taskstodo.presentation.components.tasks
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,7 +50,13 @@ fun RecursiveTaskRow(
         Text(
             modifier = Modifier
                 .weight(1f)
-                .align(Alignment.CenterVertically),
+                .align(Alignment.CenterVertically)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    onCheckTask(task.id, !task.isCompleted)
+                },
             text = task.title,
             textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
             style = MaterialTheme.typography.bodyMedium
