@@ -3,6 +3,7 @@ package com.andreast.taskstodo.presentation.components
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +58,7 @@ fun InputField(
         value = valueState.value,
         placeholder = placeholder,
         shape = RoundedCornerShape(16.dp),
+        textStyle = MaterialTheme.typography.bodyLarge,
         onValueChange = {
             valueState.value = it
             valueChanged.value = true

@@ -10,17 +10,18 @@ import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.andreast.taskstodo.presentation.components.ConfirmDialog
 import com.andreast.taskstodo.presentation.components.DropdownDivider
 import com.andreast.taskstodo.presentation.components.DropdownMenuSubtitle
-import com.andreast.taskstodo.presentation.components.InputDialog
-import com.andreast.taskstodo.presentation.components.headers.TopHeaderWithBackAndMenu
+import com.andreast.taskstodo.presentation.components.dialogs.ConfirmDialog
+import com.andreast.taskstodo.presentation.components.dialogs.InputDialog
+import com.andreast.taskstodo.presentation.components.headers.TopHeaderWithMenu
 
 private enum class MenuAction {
     None,
@@ -33,7 +34,6 @@ private enum class MenuAction {
 @Composable
 fun TaskListScreenTopHeader(
     title: String,
-    onBackClicked: () -> Unit,
     onUncheckCompleted: () -> Unit,
     onRemoveCompleted: () -> Unit,
     onEditTitle: (title: String) -> Unit,
@@ -44,11 +44,8 @@ fun TaskListScreenTopHeader(
     val isInputDialogOpen = remember { mutableStateOf(false) }
     val isConfirmDialogOpen = remember { mutableStateOf(false) }
 
-    TopHeaderWithBackAndMenu(
+    TopHeaderWithMenu(
         title = title,
-        onBackClicked = {
-            onBackClicked()
-        },
         menuImageVector = Icons.Filled.MoreVert,
         onMenuIconClick = {
             isDropdownExpanded.value = true
@@ -66,7 +63,12 @@ fun TaskListScreenTopHeader(
                 leadingIcon = {
                     Icon(Icons.Filled.Refresh, contentDescription = "Uncheck completed")
                 },
-                text = { Text("Uncheck completed") },
+                text = {
+                    Text(
+                        text = "Uncheck completed",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
                 onClick = {
                     menuActionState.value = MenuAction.UncheckCompleted
                     isConfirmDialogOpen.value = true
@@ -77,7 +79,12 @@ fun TaskListScreenTopHeader(
                 leadingIcon = {
                     Icon(Icons.Filled.Clear, contentDescription = "Remove completed")
                 },
-                text = { Text("Remove completed") },
+                text = {
+                    Text(
+                        text = "Remove completed",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
                 onClick = {
                     menuActionState.value = MenuAction.RemoveCompleted
                     isConfirmDialogOpen.value = true
@@ -92,7 +99,12 @@ fun TaskListScreenTopHeader(
                 leadingIcon = {
                     Icon(Icons.Filled.Edit, contentDescription = "Edit list title")
                 },
-                text = { Text("Edit list title") },
+                text = {
+                    Text(
+                        text = "Edit list title",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
                 onClick = {
                     menuActionState.value = MenuAction.EditTitle
                     isInputDialogOpen.value = true
@@ -103,7 +115,12 @@ fun TaskListScreenTopHeader(
                 leadingIcon = {
                     Icon(Icons.Filled.Delete, contentDescription = "Delete list")
                 },
-                text = { Text("Delete list") },
+                text = {
+                    Text(
+                        text = "Delete title",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
                 onClick = {
                     menuActionState.value = MenuAction.DeleteList
                     isConfirmDialogOpen.value = true

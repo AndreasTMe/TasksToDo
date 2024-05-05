@@ -10,6 +10,6 @@ fun TaskListsScreenTopHeader(
     GenericTopHeader(
         title = title
     ) {
-        // TODO: Maybe add settings button
+        // TODO: Add settings button
     }
 }

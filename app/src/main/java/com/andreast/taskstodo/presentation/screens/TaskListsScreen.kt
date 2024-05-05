@@ -31,8 +31,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.andreast.taskstodo.presentation.components.InputDialog
 import com.andreast.taskstodo.presentation.components.InputField
+import com.andreast.taskstodo.presentation.components.dialogs.InputDialog
 import com.andreast.taskstodo.presentation.components.tasks.TaskListsScreenTopHeader
 import kotlinx.coroutines.launch
 
@@ -76,6 +76,7 @@ fun TaskListsScreen(
                     placeholder = {
                         Text(
                             text = "Enter search...",
+                            style = MaterialTheme.typography.bodyMedium,
                             fontStyle = FontStyle.Italic
                         )
                     },
@@ -128,7 +129,8 @@ fun TaskListsScreen(
                             Text(
                                 modifier = Modifier
                                     .padding(16.dp),
-                                text = taskLists[index].title
+                                text = taskLists[index].title,
+                                style = MaterialTheme.typography.titleLarge
                             )
                         }
                     }

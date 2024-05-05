@@ -2,8 +2,6 @@ package com.andreast.taskstodo.presentation.components.headers
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -12,31 +10,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TopHeaderWithBackAndMenu(
+fun TopHeaderWithMenu(
     title: String,
-    onBackClicked: () -> Unit = {},
     menuImageVector: ImageVector,
     onMenuIconClick: () -> Unit,
     dropdownMenu: @Composable () -> Unit,
 ) {
     GenericTopHeader(
         title = title,
-        beforeText = {
-            Box {
-                IconButton(
-                    modifier = Modifier
-                        .height(40.dp),
-                    onClick = {
-                        onBackClicked()
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "'$title' Screen Back Button"
-                    )
-                }
-            }
-        },
         afterText = {
             Box {
                 IconButton(

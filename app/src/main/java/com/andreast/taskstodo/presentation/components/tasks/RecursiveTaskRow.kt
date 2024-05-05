@@ -15,13 +15,13 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -50,9 +50,8 @@ fun RecursiveTaskRow(
                 .weight(1f)
                 .align(Alignment.CenterVertically),
             text = task.title,
-            style = TextStyle(
-                textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
-            )
+            textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
+            style = MaterialTheme.typography.bodyMedium
         )
         Box {
             IconButton(
@@ -75,7 +74,12 @@ fun RecursiveTaskRow(
                     leadingIcon = {
                         Icon(Icons.Filled.Add, contentDescription = "Add sub-task")
                     },
-                    text = { Text("Add sub-task") },
+                    text = {
+                        Text(
+                            text = "Add sub-task",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
                     onClick = {
                         onAddSubTask(task)
                         isDropdownExpanded.value = false
@@ -88,7 +92,12 @@ fun RecursiveTaskRow(
                     leadingIcon = {
                         Icon(Icons.Filled.Edit, contentDescription = "Edit task")
                     },
-                    text = { Text("Edit task") },
+                    text = {
+                        Text(
+                            text = "Edit task",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
                     onClick = {
                         onEditTask(task)
                         isDropdownExpanded.value = false
@@ -98,7 +107,12 @@ fun RecursiveTaskRow(
                     leadingIcon = {
                         Icon(Icons.Filled.Delete, contentDescription = "Delete task")
                     },
-                    text = { Text("Delete task") },
+                    text = {
+                        Text(
+                            text = "Delete task",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
                     onClick = {
                         onDeleteTask(task.id)
                         isDropdownExpanded.value = false

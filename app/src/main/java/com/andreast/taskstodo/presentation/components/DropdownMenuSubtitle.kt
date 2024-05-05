@@ -7,9 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -23,8 +21,8 @@ fun DropdownMenuSubtitle(
     ) {
         Text(
             text = text,
-            fontSize = TextUnit(12f, TextUnitType.Sp),
-            fontStyle = FontStyle.Italic,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
             color = color
         )
     }
