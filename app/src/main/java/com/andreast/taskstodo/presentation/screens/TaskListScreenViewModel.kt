@@ -198,7 +198,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
 
     private fun getAllIdsRecursive(
         items: List<TaskListItemDto>,
-        predicate: (item: TaskListItemDto) -> Boolean = { false }
+        predicate: (item: TaskListItemDto) -> Boolean = { true }
     ): List<Long> {
         val itemsList = mutableListOf<Long>()
 
