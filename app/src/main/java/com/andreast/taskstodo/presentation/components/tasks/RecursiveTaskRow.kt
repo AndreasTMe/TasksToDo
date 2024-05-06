@@ -29,10 +29,16 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.presentation.components.DropdownDivider
+import com.andreast.taskstodo.presentation.components.draganddrop.DragState
+import com.andreast.taskstodo.presentation.components.draganddrop.DraggableItem
 
 @Composable
 fun RecursiveTaskRow(
     task: TaskListItemDto,
+    onDrag: (state: DragState<TaskListItemDto>) -> Unit,
+    onDragStart: (state: DragState<TaskListItemDto>) -> Unit,
+    onDragEnd: (state: DragState<TaskListItemDto>) -> Unit,
+    onDragCancel: (state: DragState<TaskListItemDto>) -> Unit,
     onCheckTask: (id: Long, isChecked: Boolean) -> Unit,
     onEditTask: (taskToEdit: TaskListItemDto) -> Unit,
     onDeleteTask: (id: Long) -> Unit,
@@ -40,92 +46,100 @@ fun RecursiveTaskRow(
 ) {
     val isDropdownExpanded = remember { mutableStateOf(false) }
 
-    Row {
-        Checkbox(
-            modifier = Modifier.width(40.dp),
-            checked = task.isCompleted,
-            onCheckedChange = {
-                onCheckTask(task.id, it)
-            })
-        Text(
-            modifier = Modifier
-                .weight(1f)
-                .align(Alignment.CenterVertically)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    onCheckTask(task.id, !task.isCompleted)
-                },
-            text = task.title,
-            textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Box {
-            IconButton(
+    DraggableItem(
+        dropData = task,
+        onDrag = onDrag,
+        onDragStart = onDragStart,
+        onDragEnd = onDragEnd,
+        onDragCancel = onDragCancel,
+    ) {
+        Row {
+            Checkbox(
                 modifier = Modifier.width(40.dp),
-                onClick = {
-                    isDropdownExpanded.value = true
+                checked = task.isCompleted,
+                onCheckedChange = {
+                    onCheckTask(task.id, it)
+                })
+            Text(
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        onCheckTask(task.id, !task.isCompleted)
+                    },
+                text = task.title,
+                textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Box {
+                IconButton(
+                    modifier = Modifier.width(40.dp),
+                    onClick = {
+                        isDropdownExpanded.value = true
+                    }
+                ) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = "Task Options")
                 }
-            ) {
-                Icon(Icons.Filled.MoreVert, contentDescription = "Task Options")
-            }
 
-            DropdownMenu(
-                expanded = isDropdownExpanded.value,
-                offset = DpOffset(x = 0.dp, y = 0.dp),
-                onDismissRequest = {
-                    isDropdownExpanded.value = false
+                DropdownMenu(
+                    expanded = isDropdownExpanded.value,
+                    offset = DpOffset(x = 0.dp, y = 0.dp),
+                    onDismissRequest = {
+                        isDropdownExpanded.value = false
+                    }
+                ) {
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(Icons.Filled.Add, contentDescription = "Add sub-task")
+                        },
+                        text = {
+                            Text(
+                                text = "Add sub-task",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        onClick = {
+                            onAddSubTask(task)
+                            isDropdownExpanded.value = false
+                        }
+                    )
+
+                    DropdownDivider()
+
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(Icons.Filled.Edit, contentDescription = "Edit task")
+                        },
+                        text = {
+                            Text(
+                                text = "Edit task",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        onClick = {
+                            onEditTask(task)
+                            isDropdownExpanded.value = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(Icons.Filled.Delete, contentDescription = "Delete task")
+                        },
+                        text = {
+                            Text(
+                                text = "Delete task",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        onClick = {
+                            onDeleteTask(task.id)
+                            isDropdownExpanded.value = false
+                        }
+                    )
                 }
-            ) {
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(Icons.Filled.Add, contentDescription = "Add sub-task")
-                    },
-                    text = {
-                        Text(
-                            text = "Add sub-task",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    },
-                    onClick = {
-                        onAddSubTask(task)
-                        isDropdownExpanded.value = false
-                    }
-                )
-
-                DropdownDivider()
-
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit task")
-                    },
-                    text = {
-                        Text(
-                            text = "Edit task",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    },
-                    onClick = {
-                        onEditTask(task)
-                        isDropdownExpanded.value = false
-                    }
-                )
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(Icons.Filled.Delete, contentDescription = "Delete task")
-                    },
-                    text = {
-                        Text(
-                            text = "Delete task",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    },
-                    onClick = {
-                        onDeleteTask(task.id)
-                        isDropdownExpanded.value = false
-                    }
-                )
             }
         }
     }
@@ -137,11 +151,15 @@ fun RecursiveTaskRow(
         ) {
             for (child in task.children) {
                 RecursiveTaskRow(
-                    child,
-                    onCheckTask,
-                    onEditTask,
-                    onDeleteTask,
-                    onAddSubTask
+                    task = child,
+                    onDrag = onDrag,
+                    onDragStart = onDragStart,
+                    onDragEnd = onDragEnd,
+                    onDragCancel = onDragCancel,
+                    onCheckTask = onCheckTask,
+                    onEditTask = onEditTask,
+                    onDeleteTask = onDeleteTask,
+                    onAddSubTask = onAddSubTask
                 )
             }
         }
