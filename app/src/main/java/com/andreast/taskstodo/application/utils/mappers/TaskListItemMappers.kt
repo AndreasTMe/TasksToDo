@@ -1,5 +1,6 @@
 package com.andreast.taskstodo.application.utils.mappers
 
+import com.andreast.taskstodo.application.dto.Level
 import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.domain.TaskListItem
 import com.andreast.taskstodo.domain.TaskListItemIdAndIsCompleted
@@ -11,23 +12,25 @@ class TaskListItemMappers {
     companion object {
         fun entityToDto(entity: TaskListItem): TaskListItemDto {
             return TaskListItemDto(
-                entity.id,
-                entity.parentId,
-                entity.taskListId,
-                entity.title,
-                entity.order,
-                entity.isCompleted
+                id = entity.id,
+                parentId = entity.parentId,
+                parentLevel = Level.None,
+                taskListId = entity.taskListId,
+                title = entity.title,
+                level = Level.Zero,
+                order = entity.order,
+                isCompleted = entity.isCompleted,
             )
         }
 
         fun dtoToEntity(dto: TaskListItemDto): TaskListItem {
             return TaskListItem(
-                dto.id,
-                dto.parentId,
-                dto.taskListId,
-                dto.title,
-                dto.order,
-                dto.isCompleted
+                id = dto.id,
+                parentId = dto.parentId,
+                taskListId = dto.taskListId,
+                title = dto.title,
+                order = dto.order,
+                isCompleted = dto.isCompleted
             )
         }
 
@@ -43,7 +46,10 @@ class TaskListItemMappers {
             return TaskListItemIdAndOrder(id, order)
         }
 
-        fun onlyIdAndIsCompletedToEntity(id: Long, isCompleted: Boolean): TaskListItemIdAndIsCompleted {
+        fun onlyIdAndIsCompletedToEntity(
+            id: Long,
+            isCompleted: Boolean
+        ): TaskListItemIdAndIsCompleted {
             return TaskListItemIdAndIsCompleted(id, isCompleted)
         }
     }

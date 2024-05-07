@@ -1,7 +1,6 @@
 package com.andreast.taskstodo.presentation.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,20 +25,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.presentation.components.dialogs.InputDialog
-import com.andreast.taskstodo.presentation.components.draganddrop.DragState
-import com.andreast.taskstodo.presentation.components.tasks.RecursiveTaskRow
+import com.andreast.taskstodo.presentation.components.tasks.TaskItemRow
 import com.andreast.taskstodo.presentation.components.tasks.TaskListScreenTopHeader
-import com.andreast.taskstodo.presentation.theme.outlineLight
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,7 +42,6 @@ fun TaskListScreen(
     val taskScreenState = taskListScreenViewModel.uiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
-    val dragState = remember { mutableStateOf(DragState<TaskListItemDto>()) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
     Scaffold(
@@ -118,25 +109,9 @@ fun TaskListScreen(
                         .padding(horizontal = 4.dp)
                 ) {
                     items(taskScreenState.value.items.size) { it ->
-                        RecursiveTaskRow(
+                        TaskItemRow(
                             task = taskScreenState.value.items[it],
-                            onDrag = { state ->
-                                dragState.value = state
-                            },
-                            onDragStart = { state ->
-                                dragState.value = state
-                            },
-                            onDragEnd = { state ->
-                                dragState.value = state
-                            },
-                            onDragCancel = { state ->
-                                dragState.value = state
-                            },
                             onCheckTask = { id, isChecked ->
-                                if (dragState.value.isDragging) {
-                                    return@RecursiveTaskRow
-                                }
-
                                 coroutineScope.launch {
                                     taskListScreenViewModel.handleTaskListItemCompletedState(
                                         id,
@@ -230,40 +205,6 @@ fun TaskListScreen(
                 isDialogOpen.value = false
             }
         )
-    }
-
-
-    if (dragState.value.isDragging) {
-        val targetSize = remember { mutableStateOf(IntSize.Zero) }
-
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 4.dp)
-                .graphicsLayer {
-                    translationY = (dragState.value.position.y + dragState.value.offset.y)
-                        .minus(targetSize.value.height / 2)
-
-                    alpha = if (targetSize.value == IntSize.Zero) 0f else 0.8f
-                }
-                .onGloballyPositioned {
-                    targetSize.value = it.size
-                }
-        ) {
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surface)
-                    .drawBehind {
-                        drawLine(
-                            outlineLight,
-                            Offset.Zero,
-                            Offset(size.width, 0f),
-                            2 * density
-                        )
-                    }
-            ) {
-                dragState.value.preview.invoke()
-            }
-        }
     }
 }
 

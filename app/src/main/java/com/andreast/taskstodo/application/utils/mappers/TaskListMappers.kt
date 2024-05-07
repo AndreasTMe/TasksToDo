@@ -6,11 +6,17 @@ import com.andreast.taskstodo.domain.TaskList
 class TaskListMappers {
     companion object {
         fun dtoToEntity(dto: TaskListDto): TaskList {
-            return TaskList(dto.id, dto.title)
+            return TaskList(
+                id = dto.id,
+                title = dto.title
+            )
         }
 
         fun entityToDto(entity: TaskList): TaskListDto {
-            return TaskListDto(entity.id, entity.title)
+            return TaskListDto(
+                id = entity.id,
+                title = entity.title
+            )
         }
     }
 }

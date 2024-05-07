@@ -122,25 +122,31 @@ class TaskScreenServiceImpl @Inject constructor(
         items: MutableList<TaskListItemDto>,
         itemsMap: MutableMap<Long, MutableList<TaskListItemDto>>
     ) {
-        for ((index, item) in items.withIndex()) {
-            if (itemsMap.isEmpty()) {
-                return
-            }
+        var index = 0
+        while (index < items.size || itemsMap.isNotEmpty()) {
+            val itemId = items[index].id
 
-            if (!itemsMap.containsKey(item.id)) {
+            if (!itemsMap.containsKey(itemId)) {
+                index++
                 continue
             }
 
-            items[index] = items[index].copy(children = itemsMap[item.id]!!)
-            itemsMap.remove(item.id)
-        }
+            items.addAll(
+                index + 1,
+                itemsMap[itemId]!!
+                    .sortedBy {
+                        it.order
+                    }
+                    .map {
+                        it.copy(
+                            level = items[index].level + 1,
+                            parentLevel = items[index].level
+                        )
+                    }
+            )
+            itemsMap.remove(itemId)
 
-        if (items.isEmpty()) {
-            return
-        }
-
-        for (item in items) {
-            populateTaskListItemsChildrenRecursive(item.children, itemsMap)
+            index++
         }
     }
 }

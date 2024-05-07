@@ -14,9 +14,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 fun <T> DraggableItem(
     modifier: Modifier = Modifier,
     dropData: T,
-    onDragStart: (state: DragState<T>) -> Unit = { },
-    onDragEnd: (state: DragState<T>) -> Unit = { },
-    onDragCancel: (state: DragState<T>) -> Unit = { },
     onDrag: (state: DragState<T>) -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -32,35 +29,36 @@ fun <T> DraggableItem(
                 detectDragGesturesAfterLongPress(
                     onDragStart = { offset ->
                         state.value = state.value.copy(
-                            isDragging = true,
+                            phase = DragPhase.Start,
                             position = position.value + offset,
                             preview = content,
                             dropData = dropData
                         )
 
-                        onDragStart(state.value)
+                        onDrag(state.value)
                     },
                     onDragEnd = {
                         state.value = state.value.copy(
-                            isDragging = false,
+                            phase = DragPhase.End,
                             position = Offset.Zero,
                             offset = Offset.Zero
                         )
 
-                        onDragEnd(state.value)
+                        onDrag(state.value)
                     },
                     onDragCancel = {
                         state.value = state.value.copy(
-                            isDragging = false,
+                            phase = DragPhase.Cancel,
                             position = Offset.Zero,
                             offset = Offset.Zero
                         )
 
-                        onDragCancel(state.value)
+                        onDrag(state.value)
                     }
                 ) { change, dragAmount ->
                     change.consume()
                     state.value = state.value.copy(
+                        phase = DragPhase.Move,
                         offset = state.value.offset + dragAmount
                     )
 

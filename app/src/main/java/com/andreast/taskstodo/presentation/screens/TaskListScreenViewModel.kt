@@ -88,7 +88,13 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListUncheckCompleted() {
-        val ids = getAllIdsRecursive(_uiState.value.items) { it.isCompleted }
+        val ids = _uiState.value.items
+            .filter {
+                it.isCompleted
+            }
+            .map {
+                it.id
+            }
         taskScreenService.updateTaskListItemsCompletedState(
             ids.map { itemId -> itemId to false }
         )
@@ -96,7 +102,13 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListRemoveCompleted() {
-        val ids = getAllIdsRecursive(_uiState.value.items) { it.isCompleted }
+        val ids = _uiState.value.items
+            .filter {
+                it.isCompleted
+            }
+            .map {
+                it.id
+            }
         taskScreenService.deleteTaskListItemsByIds(ids)
         refreshScreen()
     }
@@ -159,59 +171,41 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     private fun getParentAndChildrenIds(parentId: Long): List<Long> {
-        val parent = getItemByIdRecursive(parentId, _uiState.value.items) ?: return listOf()
+        if (_uiState.value.items.none { it.id == parentId }) {
+            return listOf()
+        }
 
-        return listOf(parentId) + getAllIdsRecursive(parent.children)
+        val ids = mutableListOf(parentId)
+
+        var temp = ids
+        while (temp.isNotEmpty()) {
+            temp = _uiState.value.items
+                .filter {
+                    temp.contains(it.parentId)
+                }
+                .map {
+                    it.id
+                }
+                .toMutableList()
+
+            ids.addAll(temp)
+        }
+
+        return ids
     }
 
     private fun calculateOrder(parentId: Long?): Int {
-        if (parentId == null) {
-            if (_uiState.value.items.isEmpty()) {
-                return 0
+        if (_uiState.value.items.isEmpty()) {
+            return 0
+        }
+
+        return _uiState.value.items
+            .filter {
+                it.parentId == parentId
             }
-
-            return _uiState.value.items.maxBy { it.order }.order + 1
-        }
-
-        val parent = getItemByIdRecursive(parentId, _uiState.value.items)
-        assert(parent != null) { "Parent not found for id $parentId" }
-
-        return parent!!.children.maxBy { it.order }.order.plus(1)
-    }
-
-    private fun getItemByIdRecursive(
-        parentId: Long,
-        items: List<TaskListItemDto>
-    ): TaskListItemDto? {
-        val parent = items.find { it.id == parentId }
-
-        if (parent != null) {
-            return parent
-        }
-
-        for (item in items) {
-            return getItemByIdRecursive(parentId, item.children) ?: continue
-        }
-
-        return null
-    }
-
-    private fun getAllIdsRecursive(
-        items: List<TaskListItemDto>,
-        predicate: (item: TaskListItemDto) -> Boolean = { true }
-    ): List<Long> {
-        val itemsList = mutableListOf<Long>()
-
-        for (item in items) {
-            if (predicate(item)) {
-                itemsList.add(item.id)
+            .maxBy {
+                it.order
             }
-
-            if (item.children.isNotEmpty()) {
-                itemsList.addAll(getAllIdsRecursive(item.children, predicate))
-            }
-        }
-
-        return itemsList
+            .order.plus(1)
     }
 }

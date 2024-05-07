@@ -28,7 +28,7 @@ fun <T> DropArea(
             }
     ) {
         val data =
-            if (isCurrentDropTarget.value && !dragState.isDragging) dragState.dropData else null
+            if (isCurrentDropTarget.value && !dragState.isDragging()) dragState.dropData else null
 
         content(isCurrentDropTarget.value, data)
     }
