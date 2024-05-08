@@ -1,6 +1,8 @@
 package com.andreast.taskstodo.presentation.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListItemInfo
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -21,10 +26,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -32,6 +41,7 @@ import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.presentation.components.dialogs.InputDialog
 import com.andreast.taskstodo.presentation.components.tasks.TaskItemRow
 import com.andreast.taskstodo.presentation.components.tasks.TaskListScreenTopHeader
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @Composable
@@ -42,6 +52,12 @@ fun TaskListScreen(
     val taskScreenState = taskListScreenViewModel.uiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
+    val lazyListState = rememberLazyListState()
+    val lazyListItemInfo = remember { mutableStateOf<LazyListItemInfo?>(null) }
+    val draggedDistance = remember { mutableFloatStateOf(0f) }
+    val draggedOffsetStart = remember { mutableIntStateOf(0) }
+    val draggedOffsetEnd = remember { mutableIntStateOf(0) }
+    val overScrollJob = remember { mutableStateOf<Job?>(null) }
     val isDialogOpen = remember { mutableStateOf(false) }
 
     Scaffold(
@@ -106,11 +122,114 @@ fun TaskListScreen(
 
                 LazyColumn(
                     modifier = Modifier
-                        .padding(horizontal = 4.dp)
+                        .pointerInput(Unit) {
+                            detectDragGesturesAfterLongPress(
+                                onDrag = { change, offset ->
+                                    change.consume()
+
+                                    draggedDistance.floatValue += offset.y
+
+                                    if (draggedOffsetStart.intValue == 0 && draggedOffsetEnd.intValue == 0) {
+                                        return@detectDragGesturesAfterLongPress
+                                    }
+
+                                    val startOffset =
+                                        draggedOffsetStart.intValue + draggedDistance.floatValue
+                                    val endOffset =
+                                        draggedOffsetEnd.intValue + draggedDistance.floatValue
+
+                                    lazyListItemInfo.value?.index
+                                        ?.let {
+                                            lazyListState.layoutInfo.visibleItemsInfo
+                                                .getOrNull(it - lazyListState.layoutInfo.visibleItemsInfo.first().index)
+                                        }
+                                        ?.let { current ->
+                                            lazyListState.layoutInfo.visibleItemsInfo
+                                                .filterNot { item ->
+                                                    startOffset > item.offset + item.size
+                                                            || endOffset < item.offset
+                                                            || current.index == item.index
+                                                }
+                                                .firstOrNull { item ->
+                                                    when {
+                                                        startOffset > current.offset -> (endOffset > item.offset + item.size)
+                                                        else -> (startOffset < item.offset)
+                                                    }
+                                                }
+                                        }
+
+                                    (lazyListItemInfo.value
+                                        ?.let {
+                                            val startOffsetInner =
+                                                it.offset + draggedDistance.floatValue
+                                            val endOffsetInner =
+                                                it.offset + it.size + draggedDistance.floatValue
+
+                                            return@let when {
+                                                draggedDistance.floatValue > 0 -> (endOffsetInner - lazyListState.layoutInfo.viewportEndOffset)
+                                                    .takeIf { diff ->
+                                                        diff > 0
+                                                    }
+
+                                                draggedDistance.floatValue < 0 -> (startOffsetInner - lazyListState.layoutInfo.viewportStartOffset)
+                                                    .takeIf { diff ->
+                                                        diff < 0
+                                                    }
+
+                                                else -> null
+                                            }
+                                        } ?: 0f)
+                                        .takeIf {
+                                            it != 0f
+                                        }
+                                        ?.let {
+                                            overScrollJob.value = coroutineScope.launch {
+                                                lazyListState.scrollBy(it)
+                                            }
+                                        } ?: kotlin.run { overScrollJob.value?.cancel() }
+                                },
+                                onDragStart = { offset ->
+                                    lazyListState.layoutInfo.visibleItemsInfo
+                                        .firstOrNull {
+                                            offset.y.toInt() in it.offset..(it.offset + it.size)
+                                        }
+                                        ?.also {
+                                            lazyListItemInfo.value = it
+                                        }
+                                },
+                                onDragEnd = {
+                                    lazyListItemInfo.value = null
+                                    draggedDistance.floatValue = 0f
+                                },
+                                onDragCancel = {
+                                    lazyListItemInfo.value = null
+                                    draggedDistance.floatValue = 0f
+                                }
+                            )
+                        }
+                        .fillMaxSize()
+                        .padding(horizontal = 4.dp),
+                    state = lazyListState
                 ) {
-                    items(taskScreenState.value.items.size) { it ->
+                    itemsIndexed(taskScreenState.value.items) { index, item ->
                         TaskItemRow(
-                            task = taskScreenState.value.items[it],
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    val offsetOrNull = lazyListItemInfo.value?.index
+                                        ?.let {
+                                            lazyListState.layoutInfo.visibleItemsInfo.getOrNull(it - lazyListState.layoutInfo.visibleItemsInfo.first().index)
+                                        }
+                                        ?.let { item ->
+                                            (lazyListItemInfo.value?.offset
+                                                ?: 0f).toFloat() + draggedDistance.floatValue - item.offset
+                                        }
+                                        .takeIf {
+                                            index == lazyListItemInfo.value?.index
+                                        }
+
+                                    translationY = offsetOrNull ?: 0f
+                                },
+                            task = item,
                             onCheckTask = { id, isChecked ->
                                 coroutineScope.launch {
                                     taskListScreenViewModel.handleTaskListItemCompletedState(

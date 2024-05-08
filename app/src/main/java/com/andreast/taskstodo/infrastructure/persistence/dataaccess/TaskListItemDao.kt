@@ -6,9 +6,8 @@ import androidx.room.Update
 import androidx.room.Upsert
 import com.andreast.taskstodo.domain.TaskListItem
 import com.andreast.taskstodo.domain.TaskListItemIdAndIsCompleted
-import com.andreast.taskstodo.domain.TaskListItemIdAndOrder
-import com.andreast.taskstodo.domain.TaskListItemIdAndParentId
 import com.andreast.taskstodo.domain.TaskListItemIdAndTitle
+import com.andreast.taskstodo.domain.TaskListItemIdParentIdAndOrder
 import com.andreast.taskstodo.domain.TaskListItemTable
 
 @Dao
@@ -27,13 +26,10 @@ interface TaskListItemDao {
     suspend fun upsert(taskListItem: TaskListItem): Long
 
     @Update(entity = TaskListItem::class)
-    suspend fun updateParentIds(vararg taskListItems: TaskListItemIdAndParentId)
+    suspend fun updateParentIdsAndOrders(vararg taskListItems: TaskListItemIdParentIdAndOrder)
 
     @Update(entity = TaskListItem::class)
     suspend fun updateTitles(vararg taskListItems: TaskListItemIdAndTitle)
-
-    @Update(entity = TaskListItem::class)
-    suspend fun updateOrders(vararg taskListItems: TaskListItemIdAndOrder)
 
     @Update(entity = TaskListItem::class)
     suspend fun updateCompletedStates(vararg taskListItems: TaskListItemIdAndIsCompleted)

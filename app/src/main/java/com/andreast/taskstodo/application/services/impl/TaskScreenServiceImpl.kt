@@ -58,19 +58,25 @@ class TaskScreenServiceImpl @Inject constructor(
         repository.updateTaskListItems(TaskListItemMappers.onlyIdAndTitleToEntity(id, title))
     }
 
-    override suspend fun updateTaskListItemParentId(id: Long, parentId: Long) {
-        repository.updateTaskListItems(TaskListItemMappers.onlyIdAndParentIdToEntity(id, parentId))
-    }
-
-    override suspend fun updateTaskListItemOrder(id: Long, order: Int) {
-        repository.updateTaskListItems(TaskListItemMappers.onlyIdAndOrderToEntity(id, order))
-    }
-
-    override suspend fun updateTaskListItemsCompletedState(items: List<Pair<Long, Boolean>>) {
+    override suspend fun updateTaskListItemParentIdAndOrder(items: List<TaskListItemDto>) {
         repository.updateTaskListItems(
             *items
                 .map {
-                    TaskListItemMappers.onlyIdAndIsCompletedToEntity(it.first, it.second)
+                    TaskListItemMappers.onlyIdParentIdAndOrderToEntity(
+                        it.id,
+                        it.parentId,
+                        it.order
+                    )
+                }
+                .toTypedArray()
+        )
+    }
+
+    override suspend fun updateTaskListItemsCompletedState(items: List<TaskListItemDto>) {
+        repository.updateTaskListItems(
+            *items
+                .map {
+                    TaskListItemMappers.onlyIdAndIsCompletedToEntity(it.id, it.isCompleted)
                 }
                 .toTypedArray()
         )

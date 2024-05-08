@@ -80,23 +80,30 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListItemCompletedState(id: Long, isCompleted: Boolean) {
-        val ids = getParentAndChildrenIds(id)
+        val items = getParentAndChildren(id)
+
+        if (items.isEmpty()) {
+            return
+        }
+
         taskScreenService.updateTaskListItemsCompletedState(
-            ids.map { itemId -> itemId to isCompleted }
+            items.map { item -> item.copy(isCompleted = isCompleted) }
         )
         refreshScreen()
     }
 
     suspend fun handleTaskListUncheckCompleted() {
-        val ids = _uiState.value.items
+        val items = _uiState.value.items
             .filter {
                 it.isCompleted
             }
-            .map {
-                it.id
-            }
+
+        if (items.isEmpty()) {
+            return
+        }
+
         taskScreenService.updateTaskListItemsCompletedState(
-            ids.map { itemId -> itemId to false }
+            items.map { item -> item.copy(isCompleted = false) }
         )
         refreshScreen()
     }
@@ -109,6 +116,11 @@ class TaskListScreenViewModel @AssistedInject constructor(
             .map {
                 it.id
             }
+
+        if (ids.isEmpty()) {
+            return
+        }
+
         taskScreenService.deleteTaskListItemsByIds(ids)
         refreshScreen()
     }
@@ -121,6 +133,11 @@ class TaskListScreenViewModel @AssistedInject constructor(
 
     suspend fun handleTaskListItemDelete(id: Long) {
         val ids = getParentAndChildrenIds(id)
+
+        if (ids.isEmpty()) {
+            return
+        }
+
         taskScreenService.deleteTaskListItemsByIds(ids)
         refreshScreen()
     }
@@ -147,6 +164,16 @@ class TaskListScreenViewModel @AssistedInject constructor(
         refreshScreen()
     }
 
+    suspend fun handleTaskListReorder(from: Int, to: Int) {
+        if (from == to) {
+            return
+        }
+
+        // TODO(Implement reordering)
+
+        refreshScreen()
+    }
+
     private suspend fun handleTaskListItemAdd(title: String) {
         taskScreenService.upsertTaskListItem(
             TaskListItemDto(
@@ -168,6 +195,29 @@ class TaskListScreenViewModel @AssistedInject constructor(
         taskScreenService.updateTaskListItemTitle(_uiState.value.selectedItem!!.id, title)
 
         return true
+    }
+
+    private fun getParentAndChildren(parentId: Long): List<TaskListItemDto> {
+        val ids = _uiState.value.items
+            .filter {
+                it.id == parentId
+            }
+            .toMutableList()
+
+        var temp = ids
+        while (temp.isNotEmpty()) {
+            temp = _uiState.value.items
+                .filter { item ->
+                    temp.any { t ->
+                        item.parentId == t.id
+                    }
+                }
+                .toMutableList()
+
+            ids.addAll(temp)
+        }
+
+        return ids
     }
 
     private fun getParentAndChildrenIds(parentId: Long): List<Long> {

@@ -38,14 +38,6 @@ data class TaskListItem(
     val isCompleted: Boolean
 )
 
-data class TaskListItemIdAndParentId(
-    @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
-    val id: Long,
-
-    @ColumnInfo(name = TaskListItemTable.COLUMN_PARENT_ID)
-    val parentId: Long?
-) : InsteadOf<TaskListItem>
-
 data class TaskListItemIdAndTitle(
     @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
     val id: Long,
@@ -54,9 +46,12 @@ data class TaskListItemIdAndTitle(
     val title: String
 ) : InsteadOf<TaskListItem>
 
-data class TaskListItemIdAndOrder(
+data class TaskListItemIdParentIdAndOrder(
     @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
     val id: Long = 0,
+
+    @ColumnInfo(name = TaskListItemTable.COLUMN_PARENT_ID)
+    val parentId: Long?,
 
     @ColumnInfo(name = TaskListItemTable.COLUMN_ORDER)
     val order: Int

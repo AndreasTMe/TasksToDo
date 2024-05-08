@@ -5,9 +5,8 @@ import com.andreast.taskstodo.application.utils.InsteadOf
 import com.andreast.taskstodo.domain.TaskList
 import com.andreast.taskstodo.domain.TaskListItem
 import com.andreast.taskstodo.domain.TaskListItemIdAndIsCompleted
-import com.andreast.taskstodo.domain.TaskListItemIdAndOrder
-import com.andreast.taskstodo.domain.TaskListItemIdAndParentId
 import com.andreast.taskstodo.domain.TaskListItemIdAndTitle
+import com.andreast.taskstodo.domain.TaskListItemIdParentIdAndOrder
 import com.andreast.taskstodo.infrastructure.persistence.dataaccess.TaskListDao
 import com.andreast.taskstodo.infrastructure.persistence.dataaccess.TaskListItemDao
 import javax.inject.Inject
@@ -46,16 +45,20 @@ class TasksRepository @Inject constructor(
         }
 
         when (taskListItems[0]) {
-            is TaskListItemIdAndParentId -> taskListItemDao.updateParentIds(
-                taskListItems[0] as TaskListItemIdAndParentId
+            is TaskListItemIdParentIdAndOrder -> taskListItemDao.updateParentIdsAndOrders(
+                *taskListItems
+                    .map {
+                        it as TaskListItemIdParentIdAndOrder
+                    }
+                    .toTypedArray()
             )
 
             is TaskListItemIdAndTitle -> taskListItemDao.updateTitles(
-                taskListItems[0] as TaskListItemIdAndTitle
-            )
-
-            is TaskListItemIdAndOrder -> taskListItemDao.updateOrders(
-                taskListItems[0] as TaskListItemIdAndOrder
+                *taskListItems
+                    .map {
+                        it as TaskListItemIdAndTitle
+                    }
+                    .toTypedArray()
             )
 
             is TaskListItemIdAndIsCompleted -> taskListItemDao.updateCompletedStates(

@@ -4,9 +4,8 @@ import com.andreast.taskstodo.application.dto.Level
 import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.domain.TaskListItem
 import com.andreast.taskstodo.domain.TaskListItemIdAndIsCompleted
-import com.andreast.taskstodo.domain.TaskListItemIdAndOrder
-import com.andreast.taskstodo.domain.TaskListItemIdAndParentId
 import com.andreast.taskstodo.domain.TaskListItemIdAndTitle
+import com.andreast.taskstodo.domain.TaskListItemIdParentIdAndOrder
 
 class TaskListItemMappers {
     companion object {
@@ -34,16 +33,16 @@ class TaskListItemMappers {
             )
         }
 
-        fun onlyIdAndParentIdToEntity(id: Long, parentId: Long): TaskListItemIdAndParentId {
-            return TaskListItemIdAndParentId(id, parentId)
-        }
-
         fun onlyIdAndTitleToEntity(id: Long, title: String): TaskListItemIdAndTitle {
             return TaskListItemIdAndTitle(id, title)
         }
 
-        fun onlyIdAndOrderToEntity(id: Long, order: Int): TaskListItemIdAndOrder {
-            return TaskListItemIdAndOrder(id, order)
+        fun onlyIdParentIdAndOrderToEntity(
+            id: Long,
+            parentId: Long?,
+            order: Int
+        ): TaskListItemIdParentIdAndOrder {
+            return TaskListItemIdParentIdAndOrder(id, parentId, order)
         }
 
         fun onlyIdAndIsCompletedToEntity(
