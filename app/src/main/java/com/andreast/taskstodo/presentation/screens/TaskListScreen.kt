@@ -1,9 +1,9 @@
 package com.andreast.taskstodo.presentation.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +35,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -48,8 +48,6 @@ import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.presentation.components.dialogs.InputDialog
 import com.andreast.taskstodo.presentation.components.tasks.TaskItemRow
 import com.andreast.taskstodo.presentation.components.tasks.TaskListScreenTopHeader
-import com.andreast.taskstodo.presentation.theme.outlineDark
-import com.andreast.taskstodo.presentation.theme.outlineLight
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -58,8 +56,6 @@ fun TaskListScreen(
     taskListScreenViewModel: TaskListScreenViewModel,
     navHostController: NavHostController
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
-
     val taskScreenState = taskListScreenViewModel.uiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
@@ -202,6 +198,15 @@ fun TaskListScreen(
                     state = lazyListState
                 ) {
                     itemsIndexed(taskScreenState.value.items) { index, item ->
+                        if (index == dropItemIndex.intValue
+                            && lazyListItemInfo.value != null && index < lazyListItemInfo.value!!.index
+                        ) {
+                            HorizontalDivider(
+                                thickness = 4.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
                         TaskItemRow(
                             modifier = Modifier
                                 .onGloballyPositioned {
@@ -211,7 +216,6 @@ fun TaskListScreen(
                                 },
                             background = when (index) {
                                 lazyListItemInfo.value?.index -> MaterialTheme.colorScheme.surfaceVariant
-                                dropItemIndex.intValue -> MaterialTheme.colorScheme.primaryContainer
                                 else -> MaterialTheme.colorScheme.surface
                             },
                             task = item,
@@ -244,6 +248,15 @@ fun TaskListScreen(
                                 isDialogOpen.value = true
                             }
                         )
+
+                        if (index == dropItemIndex.intValue
+                            && lazyListItemInfo.value != null && index > lazyListItemInfo.value!!.index
+                        ) {
+                            HorizontalDivider(
+                                thickness = 4.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
             }
@@ -313,33 +326,31 @@ fun TaskListScreen(
 
     if (lazyListItemInfo.value != null) {
         val targetSize = remember { mutableStateOf(IntSize.Zero) }
-
-        val offset = lazyListItemInfo.value?.getDragVerticalOffset(
+        val draggedVerticalOffset = lazyListItemInfo.value?.getDragVerticalOffset(
             lazyListState,
             draggedDistance.floatValue,
             draggedPosition.value.y
         ) ?: 0f
 
-        Box(modifier = Modifier
-            .drawBehind {
-                drawLine(
-                    color = if (isDarkTheme) outlineDark else outlineLight,
-                    start = Offset(0f, offset),
-                    end = Offset(size.width, offset),
-                    strokeWidth = 2.dp.toPx()
-                )
-            }
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
         ) {
             TaskItemRow(
                 modifier = Modifier
                     .graphicsLayer {
                         alpha = if (targetSize.value == IntSize.Zero) 0f else .8f
 
-                        translationY += offset
+                        translationY += draggedVerticalOffset
                     }
                     .onGloballyPositioned {
                         targetSize.value = it.size
-                    },
+                    }
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(10.dp)
+                    ),
                 task = taskScreenState.value.items[lazyListItemInfo.value!!.index],
             )
         }
