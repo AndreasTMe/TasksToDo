@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -34,18 +35,19 @@ import com.andreast.taskstodo.presentation.components.DropdownDivider
 @Composable
 fun TaskItemRow(
     modifier: Modifier = Modifier,
+    background: Color = MaterialTheme.colorScheme.surface,
     task: TaskListItemDto,
-    onCheckTask: (id: Long, isChecked: Boolean) -> Unit,
-    onEditTask: (taskToEdit: TaskListItemDto) -> Unit,
-    onDeleteTask: (id: Long) -> Unit,
-    onAddSubTask: (parent: TaskListItemDto) -> Unit
+    onCheckTask: (id: Long, isChecked: Boolean) -> Unit = { _, _ -> },
+    onEditTask: (taskToEdit: TaskListItemDto) -> Unit = { },
+    onDeleteTask: (id: Long) -> Unit = { },
+    onAddSubTask: (parent: TaskListItemDto) -> Unit = { }
 ) {
     val isDropdownExpanded = remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(background)
             .padding(start = (task.level * 30).dp)
     ) {
         Checkbox(
