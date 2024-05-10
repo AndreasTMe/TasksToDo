@@ -10,7 +10,7 @@ import com.andreast.taskstodo.domain.TaskListItem
 import java.util.stream.Collectors
 import javax.inject.Inject
 
-class TaskScreenServiceImpl @Inject constructor(
+class TaskScreenService @Inject constructor(
     private val repository: ITasksRepository
 ) : ITaskScreenService {
 
@@ -31,7 +31,7 @@ class TaskScreenServiceImpl @Inject constructor(
         val taskListItemList = repository.getTaskListItemsByListId(id)
 
         if (taskListItemList.isEmpty()) {
-            return listOf()
+            return emptyList()
         }
 
         val taskListParentItems = getTaskListItemsWithoutParent(taskListItemList)

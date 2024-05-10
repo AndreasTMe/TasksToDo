@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.andreast.taskstodo.application.dto.TaskListDto
 import com.andreast.taskstodo.application.dto.TaskListItemDto
+import com.andreast.taskstodo.application.services.ITaskFamilyService
+import com.andreast.taskstodo.application.services.ITaskOrderingService
 import com.andreast.taskstodo.application.services.ITaskScreenService
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -22,7 +24,7 @@ enum class TaskListScreenAction {
 
 data class TaskListScreenState(
     val list: TaskListDto = TaskListDto(),
-    val items: List<TaskListItemDto> = listOf(),
+    val items: List<TaskListItemDto> = emptyList(),
     val selectedItem: TaskListItemDto? = null,
     val screenAction: TaskListScreenAction = TaskListScreenAction.None
 )
@@ -30,7 +32,9 @@ data class TaskListScreenState(
 @HiltViewModel(assistedFactory = TaskListScreenViewModel.Factory::class)
 class TaskListScreenViewModel @AssistedInject constructor(
     @Assisted private val taskListId: Long,
-    private val taskScreenService: ITaskScreenService
+    private val taskScreenService: ITaskScreenService,
+    private val taskFamilyService: ITaskFamilyService,
+    private val taskOrderingService: ITaskOrderingService
 ) : ViewModel() {
 
     @AssistedFactory
@@ -80,7 +84,10 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListItemCompletedState(id: Long, isCompleted: Boolean) {
-        val items = getParentAndChildren(id)
+        val items = taskFamilyService.getParentAndChildren(
+            id,
+            _uiState.value.items,
+        )
 
         if (items.isEmpty()) {
             return
@@ -132,7 +139,10 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListItemDelete(id: Long) {
-        val ids = getParentAndChildrenIds(id)
+        val ids = taskFamilyService.getParentAndChildrenIds(
+            id,
+            _uiState.value.items,
+        )
 
         if (ids.isEmpty()) {
             return
@@ -165,12 +175,12 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListReorder(from: Int, to: Int) {
-        if (from == to) {
+        val reordered = taskOrderingService.reorderTasks(from, to, _uiState.value.items)
+        if (reordered.isEmpty()) {
             return
         }
 
-        // TODO(Implement reordering)
-
+        taskScreenService.updateTaskListItemParentIdAndOrder(reordered)
         refreshScreen()
     }
 
@@ -180,7 +190,10 @@ class TaskListScreenViewModel @AssistedInject constructor(
                 parentId = _uiState.value.selectedItem?.id,
                 taskListId = taskListId,
                 title = title,
-                order = calculateOrder(_uiState.value.selectedItem?.parentId)
+                order = taskOrderingService.calculateOrder(
+                    _uiState.value.selectedItem?.parentId,
+                    _uiState.value.items
+                )
             )
         )
     }
@@ -195,67 +208,5 @@ class TaskListScreenViewModel @AssistedInject constructor(
         taskScreenService.updateTaskListItemTitle(_uiState.value.selectedItem!!.id, title)
 
         return true
-    }
-
-    private fun getParentAndChildren(parentId: Long): List<TaskListItemDto> {
-        val ids = _uiState.value.items
-            .filter {
-                it.id == parentId
-            }
-            .toMutableList()
-
-        var temp = ids
-        while (temp.isNotEmpty()) {
-            temp = _uiState.value.items
-                .filter { item ->
-                    temp.any { t ->
-                        item.parentId == t.id
-                    }
-                }
-                .toMutableList()
-
-            ids.addAll(temp)
-        }
-
-        return ids
-    }
-
-    private fun getParentAndChildrenIds(parentId: Long): List<Long> {
-        if (_uiState.value.items.none { it.id == parentId }) {
-            return listOf()
-        }
-
-        val ids = mutableListOf(parentId)
-
-        var temp = ids
-        while (temp.isNotEmpty()) {
-            temp = _uiState.value.items
-                .filter {
-                    temp.contains(it.parentId)
-                }
-                .map {
-                    it.id
-                }
-                .toMutableList()
-
-            ids.addAll(temp)
-        }
-
-        return ids
-    }
-
-    private fun calculateOrder(parentId: Long?): Int {
-        if (_uiState.value.items.isEmpty()) {
-            return 0
-        }
-
-        return _uiState.value.items
-            .filter {
-                it.parentId == parentId
-            }
-            .maxBy {
-                it.order
-            }
-            .order.plus(1)
     }
 }

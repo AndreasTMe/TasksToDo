@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class TaskListsScreenState(
-    val lists: List<TaskListDto> = listOf()
+    val lists: List<TaskListDto> = emptyList()
 )
 
 @HiltViewModel

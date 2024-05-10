@@ -77,8 +77,8 @@ fun TaskListScreen(
                     modifier = Modifier
                         .height(40.dp),
                     onClick = {
-                        navHostController.navigate(route = ScreenInfo.TaskListsScreen.route) {
-                            popUpTo(ScreenInfo.TaskListsScreen.route) {
+                        navHostController.navigate(route = ScreenInfo.TaskListsScreen) {
+                            popUpTo(ScreenInfo.TaskListsScreen) {
                                 inclusive = true
                             }
                         }
@@ -117,8 +117,8 @@ fun TaskListScreen(
                     },
                     onDeleteList = {
                         coroutineScope.launch {
-                            navHostController.navigate(route = ScreenInfo.TaskListsScreen.route) {
-                                popUpTo(ScreenInfo.TaskListsScreen.route) {
+                            navHostController.navigate(route = ScreenInfo.TaskListsScreen) {
+                                popUpTo(ScreenInfo.TaskListsScreen) {
                                     inclusive = true
                                 }
                             }
@@ -180,10 +180,20 @@ fun TaskListScreen(
                                         }
                                 },
                                 onDragEnd = {
-                                    lazyListItemInfo.value = null
-                                    draggedDistance.floatValue = 0f
-                                    draggedPosition.value = Offset.Zero
-                                    dropItemIndex.intValue = -1
+                                    val draggedItemIndex = lazyListItemInfo.value?.index
+                                        ?: return@detectDragGesturesAfterLongPress
+
+                                    coroutineScope.launch {
+                                        taskListScreenViewModel.handleTaskListReorder(
+                                            draggedItemIndex,
+                                            dropItemIndex.intValue
+                                        )
+
+                                        lazyListItemInfo.value = null
+                                        draggedDistance.floatValue = 0f
+                                        draggedPosition.value = Offset.Zero
+                                        dropItemIndex.intValue = -1
+                                    }
                                 },
                                 onDragCancel = {
                                     lazyListItemInfo.value = null
@@ -219,24 +229,24 @@ fun TaskListScreen(
                                 else -> MaterialTheme.colorScheme.surface
                             },
                             task = item,
-                            onCheckTask = { id, isChecked ->
+                            onCheckTask = { task ->
                                 coroutineScope.launch {
                                     taskListScreenViewModel.handleTaskListItemCompletedState(
-                                        id,
-                                        isChecked
+                                        task.id,
+                                        !task.isCompleted
                                     )
                                 }
                             },
-                            onEditTask = { taskToEdit ->
+                            onEditTask = { task ->
                                 taskListScreenViewModel.selectItem(
-                                    taskToEdit,
+                                    task,
                                     TaskListScreenAction.EditTask
                                 )
                                 isDialogOpen.value = true
                             },
-                            onDeleteTask = { id ->
+                            onDeleteTask = { task ->
                                 coroutineScope.launch {
-                                    taskListScreenViewModel.handleTaskListItemDelete(id)
+                                    taskListScreenViewModel.handleTaskListItemDelete(task.id)
                                 }
                             },
                             onAddSubTask = { parent ->
@@ -294,8 +304,8 @@ fun TaskListScreen(
     )
 
     BackHandler {
-        navHostController.navigate(route = ScreenInfo.TaskListsScreen.route) {
-            popUpTo(ScreenInfo.TaskListsScreen.route) {
+        navHostController.navigate(route = ScreenInfo.TaskListsScreen) {
+            popUpTo(ScreenInfo.TaskListsScreen) {
                 inclusive = true
             }
         }

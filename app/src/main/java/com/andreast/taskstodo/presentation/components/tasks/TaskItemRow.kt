@@ -37,9 +37,9 @@ fun TaskItemRow(
     modifier: Modifier = Modifier,
     background: Color = MaterialTheme.colorScheme.surface,
     task: TaskListItemDto,
-    onCheckTask: (id: Long, isChecked: Boolean) -> Unit = { _, _ -> },
-    onEditTask: (taskToEdit: TaskListItemDto) -> Unit = { },
-    onDeleteTask: (id: Long) -> Unit = { },
+    onCheckTask: (task: TaskListItemDto) -> Unit = { },
+    onEditTask: (task: TaskListItemDto) -> Unit = { },
+    onDeleteTask: (task: TaskListItemDto) -> Unit = { },
     onAddSubTask: (parent: TaskListItemDto) -> Unit = { }
 ) {
     val isDropdownExpanded = remember { mutableStateOf(false) }
@@ -54,7 +54,7 @@ fun TaskItemRow(
             modifier = Modifier.width(40.dp),
             checked = task.isCompleted,
             onCheckedChange = {
-                onCheckTask(task.id, it)
+                onCheckTask(task)
             })
         Text(
             modifier = Modifier
@@ -64,7 +64,7 @@ fun TaskItemRow(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
                 ) {
-                    onCheckTask(task.id, !task.isCompleted)
+                    onCheckTask(task)
                 },
             text = task.title,
             textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
@@ -131,7 +131,7 @@ fun TaskItemRow(
                         )
                     },
                     onClick = {
-                        onDeleteTask(task.id)
+                        onDeleteTask(task)
                         isDropdownExpanded.value = false
                     }
                 )

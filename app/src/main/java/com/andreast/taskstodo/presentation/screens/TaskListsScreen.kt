@@ -119,9 +119,7 @@ fun TaskListsScreen(
                                 .align(Alignment.CenterHorizontally)
                                 .clickable {
                                     navHostController.navigate(
-                                        route = ScreenInfo.TaskListScreen.createRoute(
-                                            taskListId = taskLists[index].id.toString()
-                                        )
+                                        route = ScreenInfo.TaskListScreen(taskLists[index].id)
                                     )
                                 },
                             contentAlignment = Alignment.BottomStart
@@ -168,7 +166,7 @@ fun TaskListsScreen(
                             assert(taskListId > 0) { "Task list creation returned $taskListId. This should never happen!" }
 
                             navHostController.navigate(
-                                route = ScreenInfo.TaskListScreen.createRoute(taskListId.toString())
+                                route = ScreenInfo.TaskListScreen(taskListId)
                             )
                         }
                     },

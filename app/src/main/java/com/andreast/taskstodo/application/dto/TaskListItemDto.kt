@@ -13,8 +13,16 @@ enum class Level(val value: Int) {
         return fromInt(this.value + other)
     }
 
+    operator fun plus(other: Level): Level {
+        return fromInt(this.value + other.value)
+    }
+
     operator fun minus(other: Int): Level {
         return fromInt(this.value - other)
+    }
+
+    operator fun minus(other: Level): Level {
+        return fromInt(this.value - other.value)
     }
 
     operator fun times(other: Int): Int {

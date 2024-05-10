@@ -5,13 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.andreast.taskstodo.presentation.screens.ScreenInfo
-import com.andreast.taskstodo.presentation.screens.TASK_LIST_SCREEN_ROUTE_KEY
 import com.andreast.taskstodo.presentation.screens.TaskListScreen
 import com.andreast.taskstodo.presentation.screens.TaskListScreenViewModel
 import com.andreast.taskstodo.presentation.screens.TaskListsScreen
@@ -32,32 +30,21 @@ class TasksActivity : ComponentActivity() {
 
                 NavHost(
                     navController = _navController,
-                    startDestination = ScreenInfo.TaskListsScreen.route
+                    startDestination = ScreenInfo.TaskListsScreen
                 ) {
-                    composable(
-                        route = ScreenInfo.TaskListsScreen.route
-                    ) {
+                    composable<ScreenInfo.TaskListsScreen> {
                         TaskListsScreen(hiltViewModel<TaskListsScreenViewModel>(), _navController)
                     }
-                    composable(
-                        route = ScreenInfo.TaskListScreen.route,
-                        arguments = listOf(navArgument(TASK_LIST_SCREEN_ROUTE_KEY) {
-                            type = NavType.StringType
-                            defaultValue = ""
-                        })
-                    ) {
-                        val taskListId =
-                            it.arguments?.getString(TASK_LIST_SCREEN_ROUTE_KEY)?.toLongOrNull()
-                        if (taskListId != null) {
-                            TaskListScreen(
-                                hiltViewModel<TaskListScreenViewModel, TaskListScreenViewModel.Factory>(
-                                    creationCallback = { factory ->
-                                        factory.create(taskListId = taskListId)
-                                    }
-                                ),
-                                _navController
-                            )
-                        }
+                    composable<ScreenInfo.TaskListScreen> { navBackStackEntry ->
+                        val taskListScreen = navBackStackEntry.toRoute<ScreenInfo.TaskListScreen>()
+                        TaskListScreen(
+                            hiltViewModel<TaskListScreenViewModel, TaskListScreenViewModel.Factory>(
+                                creationCallback = { factory ->
+                                    factory.create(taskListId = taskListScreen.id)
+                                }
+                            ),
+                            _navController
+                        )
                     }
                 }
             }
