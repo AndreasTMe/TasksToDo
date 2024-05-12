@@ -43,7 +43,7 @@ class TaskFamilyServiceTests {
         val parentId: Long = 1
         val items = listOf(
             TaskListItemDto(id = 0),
-            TaskListItemDto(id = 1), // Parent
+            TaskListItemDto(id = parentId), // Parent
             TaskListItemDto(id = 2),
         )
 
@@ -62,9 +62,9 @@ class TaskFamilyServiceTests {
         val parentId: Long = 1
         val items = listOf(
             TaskListItemDto(id = 0),
-            TaskListItemDto(id = 1), // Parent
+            TaskListItemDto(id = parentId), // Parent
             TaskListItemDto(id = 2),
-            TaskListItemDto(id = 3, parentId = 1), // Child
+            TaskListItemDto(id = 3, parentId = parentId), // Child
             TaskListItemDto(id = 4, parentId = 3), // Grandchild
         )
 
@@ -115,7 +115,7 @@ class TaskFamilyServiceTests {
         val parentId: Long = 1
         val items = listOf(
             TaskListItemDto(id = 0),
-            TaskListItemDto(id = 1), // Parent
+            TaskListItemDto(id = parentId), // Parent
             TaskListItemDto(id = 2),
         )
 
@@ -134,9 +134,9 @@ class TaskFamilyServiceTests {
         val parentId: Long = 1
         val items = listOf(
             TaskListItemDto(id = 0),
-            TaskListItemDto(id = 1), // Parent
+            TaskListItemDto(id = parentId), // Parent
             TaskListItemDto(id = 2),
-            TaskListItemDto(id = 3, parentId = 1), // Child
+            TaskListItemDto(id = 3, parentId = parentId), // Child
             TaskListItemDto(id = 4, parentId = 3), // Grandchild
         )
 

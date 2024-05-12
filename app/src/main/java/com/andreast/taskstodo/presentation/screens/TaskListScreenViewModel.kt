@@ -185,15 +185,21 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     private suspend fun handleTaskListItemAdd(title: String) {
+        val order = taskOrderingService.calculateOrderForNewItem(
+            _uiState.value.selectedItem?.parentId,
+            _uiState.value.items
+        )
+
+        if (order < 0) {
+            return
+        }
+
         taskScreenService.upsertTaskListItem(
             TaskListItemDto(
                 parentId = _uiState.value.selectedItem?.id,
                 taskListId = taskListId,
                 title = title,
-                order = taskOrderingService.calculateOrderForNewItem(
-                    _uiState.value.selectedItem?.parentId,
-                    _uiState.value.items
-                )
+                order = order
             )
         )
     }
