@@ -1,6 +1,6 @@
 package com.andreast.taskstodo.application.dto
 
-enum class Level(val value: Int) {
+enum class Level(private val value: Int) {
     None(-1),
     Zero(0),
     One(1),
@@ -9,27 +9,23 @@ enum class Level(val value: Int) {
     Four(4),
     Five(5);
 
+    companion object {
+        fun addValues(l1: Level, l2: Level): Int {
+            return l1.value + l2.value
+        }
+
+        fun maxValue(): Int {
+            return entries.maxOf { it.value }
+        }
+    }
+
     operator fun plus(other: Int): Level {
-        return fromInt(this.value + other)
-    }
-
-    operator fun plus(other: Level): Level {
-        return fromInt(this.value + other.value)
-    }
-
-    operator fun minus(other: Int): Level {
-        return fromInt(this.value - other)
-    }
-
-    operator fun minus(other: Level): Level {
-        return fromInt(this.value - other.value)
+        return entries.firstOrNull { it.value == value + other } ?: None
     }
 
     operator fun times(other: Int): Int {
         return this.value * other
     }
-
-    private fun fromInt(value: Int) = entries.firstOrNull { it.value == value } ?: None
 }
 
 data class TaskListItemDto(

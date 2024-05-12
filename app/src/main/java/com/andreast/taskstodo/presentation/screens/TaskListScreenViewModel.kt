@@ -190,7 +190,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
                 parentId = _uiState.value.selectedItem?.id,
                 taskListId = taskListId,
                 title = title,
-                order = taskOrderingService.calculateOrder(
+                order = taskOrderingService.calculateOrderForNewItem(
                     _uiState.value.selectedItem?.parentId,
                     _uiState.value.items
                 )
