@@ -1,8 +1,8 @@
 package com.andreast.taskstodo.application.services.impl
 
-import com.andreast.taskstodo.application.dto.Level
 import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.application.services.ITaskOrderingService
+import com.andreast.taskstodo.application.utils.Level
 
 class TaskOrderingService : ITaskOrderingService {
     override fun calculateOrderForNewItem(parentId: Long?, items: List<TaskListItemDto>): Int {
@@ -52,6 +52,78 @@ class TaskOrderingService : ITaskOrderingService {
             } else {
                 items.getReorderedWhenMovingUp(fromItem, toItem)
             }
+        } else {
+            emptyList()
+        }
+    }
+
+    override fun reorderTasksAfterLevelChange(
+        index: Int,
+        level: Level,
+        items: List<TaskListItemDto>
+    ): List<TaskListItemDto> {
+        if (index !in 1..<items.size) {
+            return emptyList()
+        }
+
+        return if (level == items[index].level - 1) {
+            val parentIndex = items
+                .indexOfFirst { item ->
+                    item.id == items[index].parentId
+                }
+
+            items
+                .filter { item ->
+                    item.parentId == items[index].parentId || item.parentId == items[parentIndex].parentId
+                }
+                .map { item ->
+                    return@map if (item.parentId == items[index].parentId) {
+                        if (item.id == items[index].id) {
+                            item.copy(
+                                parentId = items[parentIndex].parentId,
+                                order = items[parentIndex].order + 1
+                            )
+                        } else if (item.order < items[index].order) {
+                            item
+                        } else {
+                            item.copy(
+                                order = item.order - 1
+                            )
+                        }
+                    } else {
+                        if (item.order <= items[parentIndex].order) {
+                            item
+                        } else {
+                            item.copy(
+                                order = item.order + 1
+                            )
+                        }
+                    }
+                }
+        } else if (level == items[index].level + 1) {
+            val previousSameLevelItemId = items
+                .first { item ->
+                    item.parentId == items[index].parentId && item.order == items[index].order - 1
+                }.id
+
+            items
+                .filter { item ->
+                    item.parentId == items[index].parentId
+                }
+                .map { item ->
+                    return@map if (item.id == items[index].id) {
+                        item.copy(
+                            parentId = previousSameLevelItemId,
+                            order = items.count { it.parentId == previousSameLevelItemId }
+                        )
+                    } else if (item.order > items[index].order) {
+                        item.copy(
+                            order = item.order - 1
+                        )
+                    } else {
+                        item
+                    }
+                }
         } else {
             emptyList()
         }
@@ -158,12 +230,12 @@ private fun List<TaskListItemDto>.getReorderedWhenMovingDownAsChild(
             item.parentId == fromItem.parentId || item.parentId == toItem.id
         }
         .map {
-            if (it.id == fromItem.id) {
-                return@map it.copy(parentId = toItem.id, order = 0)
+            return@map if (it.id == fromItem.id) {
+                it.copy(parentId = toItem.id, order = 0)
             } else if (it.parentId == fromItem.parentId) {
-                return@map it.copy(order = fromLevelOrder++)
+                it.copy(order = fromLevelOrder++)
             } else {
-                return@map it.copy(order = toLevelOrder++)
+                it.copy(order = toLevelOrder++)
             }
         }
 }
@@ -202,12 +274,12 @@ private fun List<TaskListItemDto>.getReorderedWhenMovingUpAsChild(
             item.parentId == fromItem.parentId || item.parentId == toItem.id
         }
         .map {
-            if (it.id == fromItem.id) {
-                return@map it.copy(parentId = toItem.id, order = 0)
+            return@map if (it.id == fromItem.id) {
+                it.copy(parentId = toItem.id, order = 0)
             } else if (it.parentId == fromItem.parentId) {
-                return@map it.copy(order = fromLevelOrder++)
+                it.copy(order = fromLevelOrder++)
             } else {
-                return@map it.copy(order = toLevelOrder++)
+                it.copy(order = toLevelOrder++)
             }
         }
 }

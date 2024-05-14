@@ -7,6 +7,7 @@ import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.application.services.ITaskFamilyService
 import com.andreast.taskstodo.application.services.ITaskOrderingService
 import com.andreast.taskstodo.application.services.ITaskScreenService
+import com.andreast.taskstodo.application.utils.Level
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -176,6 +177,24 @@ class TaskListScreenViewModel @AssistedInject constructor(
 
     suspend fun handleTaskListReorder(from: Int, to: Int) {
         val reordered = taskOrderingService.reorderTasks(from, to, _uiState.value.items)
+        if (reordered.isEmpty()) {
+            return
+        }
+
+        taskScreenService.updateTaskListItemParentIdAndOrder(reordered)
+        refreshScreen()
+    }
+
+    suspend fun handleTaskListItemLevelChange(index: Int, level: Level) {
+        if (index !in 1..<_uiState.value.items.size) {
+            return
+        }
+
+        val reordered = taskOrderingService.reorderTasksAfterLevelChange(
+            index,
+            level,
+            _uiState.value.items
+        )
         if (reordered.isEmpty()) {
             return
         }

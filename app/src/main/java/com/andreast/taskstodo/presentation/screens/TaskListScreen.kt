@@ -230,6 +230,10 @@ fun TaskListScreen(
                             },
                             task = item,
                             onCheckTask = { task ->
+                                if (lazyListItemInfo.value != null) {
+                                    return@TaskItemRow
+                                }
+
                                 coroutineScope.launch {
                                     taskListScreenViewModel.handleTaskListItemCompletedState(
                                         task.id,
@@ -256,6 +260,14 @@ fun TaskListScreen(
                                 )
 
                                 isDialogOpen.value = true
+                            },
+                            onLevelChange = { level ->
+                                coroutineScope.launch {
+                                    taskListScreenViewModel.handleTaskListItemLevelChange(
+                                        index,
+                                        level
+                                    )
+                                }
                             }
                         )
 

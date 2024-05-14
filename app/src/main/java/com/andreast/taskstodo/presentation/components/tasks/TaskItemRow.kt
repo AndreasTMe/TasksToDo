@@ -2,6 +2,7 @@ package com.andreast.taskstodo.presentation.components.tasks
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -21,15 +22,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.andreast.taskstodo.application.dto.TaskListItemDto
+import com.andreast.taskstodo.application.utils.Level
 import com.andreast.taskstodo.presentation.components.DropdownDivider
 
 @Composable
@@ -40,8 +44,10 @@ fun TaskItemRow(
     onCheckTask: (task: TaskListItemDto) -> Unit = { },
     onEditTask: (task: TaskListItemDto) -> Unit = { },
     onDeleteTask: (task: TaskListItemDto) -> Unit = { },
-    onAddSubTask: (parent: TaskListItemDto) -> Unit = { }
+    onAddSubTask: (parent: TaskListItemDto) -> Unit = { },
+    onLevelChange: (level: Level) -> Unit = { }
 ) {
+    val dragState = remember { mutableIntStateOf(0) }
     val isDropdownExpanded = remember { mutableStateOf(false) }
 
     Row(
@@ -49,6 +55,35 @@ fun TaskItemRow(
             .fillMaxWidth()
             .background(background)
             .padding(start = (task.level * 30).dp)
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(
+                    onHorizontalDrag = { change, dragAmount ->
+                        change.consume()
+
+                        when {
+                            dragAmount > 0 && task.level < Level.maxValue() -> {
+                                dragState.intValue = 1
+                            }
+
+                            dragAmount < 0 && task.level > 0 -> {
+                                dragState.intValue = -1
+                            }
+
+                            else -> return@detectHorizontalDragGestures
+                        }
+                    },
+                    onDragStart = {
+                        dragState.intValue = 0
+                    },
+                    onDragEnd = {
+                        onLevelChange(task.level + dragState.intValue)
+                        dragState.intValue = 0
+                    },
+                    onDragCancel = {
+                        dragState.intValue = 0
+                    }
+                )
+            }
     ) {
         Checkbox(
             modifier = Modifier.width(40.dp),

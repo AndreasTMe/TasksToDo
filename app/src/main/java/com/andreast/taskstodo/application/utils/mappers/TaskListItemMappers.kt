@@ -1,7 +1,7 @@
 package com.andreast.taskstodo.application.utils.mappers
 
-import com.andreast.taskstodo.application.dto.Level
 import com.andreast.taskstodo.application.dto.TaskListItemDto
+import com.andreast.taskstodo.application.utils.Level
 import com.andreast.taskstodo.domain.TaskListItem
 import com.andreast.taskstodo.domain.TaskListItemIdAndIsCompleted
 import com.andreast.taskstodo.domain.TaskListItemIdAndTitle

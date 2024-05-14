@@ -1,7 +1,7 @@
 package com.andreast.taskstodo.application.services.impl
 
-import com.andreast.taskstodo.application.dto.Level
 import com.andreast.taskstodo.application.dto.TaskListItemDto
+import com.andreast.taskstodo.application.utils.Level
 import org.junit.Test
 
 class TaskOrderingServiceTests {
@@ -376,5 +376,94 @@ class TaskOrderingServiceTests {
         assert(result[1].id == items[1].id && result[1].order == 1)
         assert(result[2].id == items[2].id && result[2].order == 2)
         assert(result[3].id == items[4].id && result[3].order == 3)
+    }
+
+    @Test
+    fun reorderTasksAfterLevelChange_changeFirstItemLevel_returnEmptyList() {
+        // Arrange
+        val index = 0
+        val level = Level.One
+        val items = listOf(
+            TaskListItemDto(id = 0, order = 0, level = Level.Zero),
+            TaskListItemDto(id = 1, parentId = 0, order = 0, level = Level.One),
+        )
+
+        // Act
+        val result = sut.reorderTasksAfterLevelChange(index, level, items)
+
+        // Assert
+        assert(result.isEmpty())
+    }
+
+    @Test
+    fun reorderTasksAfterLevelChange_noLevelChange_returnEmptyList() {
+        // Arrange
+        val index = 1
+        val level = Level.One
+        val items = listOf(
+            TaskListItemDto(id = 0, order = 0, level = Level.Zero),
+            TaskListItemDto(id = 1, parentId = 0, order = 0, level = Level.One),
+        )
+
+        // Act
+        val result = sut.reorderTasksAfterLevelChange(index, level, items)
+
+        // Assert
+        assert(result.isEmpty())
+    }
+
+    @Test
+    fun reorderTasksAfterLevelChange_makeSameLevelAsParent_returnReorderedTasks() {
+        // Arrange
+        val index = 3
+        val level = Level.Zero
+        val items = listOf(
+            TaskListItemDto(id = 0, order = 0, level = Level.Zero),
+            TaskListItemDto(id = 1, order = 1, level = Level.Zero),
+            TaskListItemDto(id = 2, parentId = 1, order = 0, level = Level.One),
+            TaskListItemDto(id = 3, parentId = 1, order = 1, level = Level.One),
+            TaskListItemDto(id = 4, parentId = 1, order = 2, level = Level.One),
+            TaskListItemDto(id = 5, parentId = 4, order = 0, level = Level.Two),
+            TaskListItemDto(id = 6, order = 2, level = Level.Zero),
+        )
+
+        // Act
+        val result = sut.reorderTasksAfterLevelChange(index, level, items)
+
+        // Assert
+        assert(result.isNotEmpty())
+        assert(result.size == 6)
+        assert(result.any { it.id == items[0].id && it.order == 0 })
+        assert(result.any { it.id == items[1].id && it.order == 1 })
+        assert(result.any { it.id == items[2].id && it.order == 0 })
+        assert(result.any { it.id == items[3].id && it.order == 2 })
+        assert(result.any { it.id == items[4].id && it.order == 1 })
+        assert(result.any { it.id == items[6].id && it.order == 3 })
+    }
+
+    @Test
+    fun reorderTasksAfterLevelChange_moveToChildLevel_returnReorderedTasks() {
+        // Arrange
+        val index = 5
+        val level = Level.One
+        val items = listOf(
+            TaskListItemDto(id = 0, order = 0, level = Level.Zero),
+            TaskListItemDto(id = 1, parentId = 0, order = 0, level = Level.One),
+            TaskListItemDto(id = 2, parentId = 0, order = 1, level = Level.One),
+            TaskListItemDto(id = 3, parentId = 0, order = 2, level = Level.One),
+            TaskListItemDto(id = 4, parentId = 3, order = 0, level = Level.Two),
+            TaskListItemDto(id = 5, order = 1, level = Level.Zero),
+            TaskListItemDto(id = 6, order = 2, level = Level.Zero),
+        )
+
+        // Act
+        val result = sut.reorderTasksAfterLevelChange(index, level, items)
+
+        // Assert
+        assert(result.isNotEmpty())
+        assert(result.size == 3)
+        assert(result.any { it.id == items[0].id && it.order == 0 })
+        assert(result.any { it.id == items[5].id && it.order == 3 })
+        assert(result.any { it.id == items[6].id && it.order == 1 })
     }
 }
