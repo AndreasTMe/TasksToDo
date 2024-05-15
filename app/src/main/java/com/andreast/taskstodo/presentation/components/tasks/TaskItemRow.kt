@@ -1,5 +1,6 @@
 package com.andreast.taskstodo.presentation.components.tasks
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -50,15 +51,28 @@ fun TaskItemRow(
     val dragState = remember { mutableIntStateOf(0) }
     val isDropdownExpanded = remember { mutableStateOf(false) }
 
+    val paddingStart = animateDpAsState(
+        label = "",
+        targetValue = (when {
+            dragState.intValue > 0 -> task.level + 1
+            dragState.intValue < 0 -> task.level - 1
+            else -> task.level
+        } * 30).dp
+    )
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .background(background)
-            .padding(start = (task.level * 30).dp)
-            .pointerInput(Unit) {
+            .padding(start = paddingStart.value)
+            .pointerInput(task.level) {
                 detectHorizontalDragGestures(
                     onHorizontalDrag = { change, dragAmount ->
                         change.consume()
+
+                        if (dragState.intValue != 0) {
+                            return@detectHorizontalDragGestures
+                        }
 
                         when {
                             dragAmount > 0 && task.level < Level.maxValue() -> {
@@ -76,7 +90,9 @@ fun TaskItemRow(
                         dragState.intValue = 0
                     },
                     onDragEnd = {
-                        onLevelChange(task.level + dragState.intValue)
+                        if (dragState.intValue != 0) {
+                            onLevelChange(task.level + dragState.intValue)
+                        }
                         dragState.intValue = 0
                     },
                     onDragCancel = {

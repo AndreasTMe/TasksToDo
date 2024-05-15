@@ -40,20 +40,24 @@ class TaskOrderingService : ITaskOrderingService {
         val toItem = items[to]
         val shouldBecomeChild = checkIfShouldBecomeChild(from, to, items)
 
-        return if (from < to && canReorderWhenMovingDown(from, to, items, shouldBecomeChild)) {
-            if (shouldBecomeChild) {
-                items.getReorderedWhenMovingDownAsChild(fromItem, toItem)
-            } else {
-                items.getReorderedWhenMovingDown(fromItem, toItem)
+        return when {
+            from < to && canReorderWhenMovingDown(from, to, items, shouldBecomeChild) -> {
+                if (shouldBecomeChild) {
+                    items.getReorderedWhenMovingDownAsChild(fromItem, toItem)
+                } else {
+                    items.getReorderedWhenMovingDown(fromItem, toItem)
+                }
             }
-        } else if (from > to && canReorderWhenMovingUp(from, to, items, shouldBecomeChild)) {
-            if (shouldBecomeChild) {
-                items.getReorderedWhenMovingUpAsChild(fromItem, toItem)
-            } else {
-                items.getReorderedWhenMovingUp(fromItem, toItem)
+
+            from > to && canReorderWhenMovingUp(from, to, items, shouldBecomeChild) -> {
+                if (shouldBecomeChild) {
+                    items.getReorderedWhenMovingUpAsChild(fromItem, toItem)
+                } else {
+                    items.getReorderedWhenMovingUp(fromItem, toItem)
+                }
             }
-        } else {
-            emptyList()
+
+            else -> emptyList()
         }
     }
 
@@ -66,66 +70,63 @@ class TaskOrderingService : ITaskOrderingService {
             return emptyList()
         }
 
-        return if (level == items[index].level - 1) {
-            val parentIndex = items
-                .indexOfFirst { item ->
-                    item.id == items[index].parentId
-                }
+        return when (level) {
+            items[index].level - 1 -> {
+                val parentIndex = items
+                    .indexOfFirst { item ->
+                        item.id == items[index].parentId
+                    }
 
-            items
-                .filter { item ->
-                    item.parentId == items[index].parentId || item.parentId == items[parentIndex].parentId
-                }
-                .map { item ->
-                    return@map if (item.parentId == items[index].parentId) {
-                        if (item.id == items[index].id) {
-                            item.copy(
-                                parentId = items[parentIndex].parentId,
-                                order = items[parentIndex].order + 1
-                            )
-                        } else if (item.order < items[index].order) {
-                            item
-                        } else {
-                            item.copy(
-                                order = item.order - 1
-                            )
-                        }
-                    } else {
-                        if (item.order <= items[parentIndex].order) {
-                            item
-                        } else {
-                            item.copy(
-                                order = item.order + 1
-                            )
+                items
+                    .filter { item ->
+                        item.parentId == items[index].parentId || item.parentId == items[parentIndex].parentId
+                    }
+                    .map { item ->
+                        return@map when {
+                            item.parentId == items[index].parentId -> {
+                                when {
+                                    item.id == items[index].id -> item.copy(
+                                        parentId = items[parentIndex].parentId,
+                                        order = items[parentIndex].order + 1
+                                    )
+
+                                    item.order >= items[index].order -> item.copy(order = item.order - 1)
+                                    else -> item
+                                }
+                            }
+
+                            item.order > items[parentIndex].order -> item.copy(order = item.order + 1)
+                            else -> item
                         }
                     }
-                }
-        } else if (level == items[index].level + 1) {
-            val previousSameLevelItemId = items
-                .first { item ->
-                    item.parentId == items[index].parentId && item.order == items[index].order - 1
-                }.id
+            }
 
-            items
-                .filter { item ->
-                    item.parentId == items[index].parentId
-                }
-                .map { item ->
-                    return@map if (item.id == items[index].id) {
-                        item.copy(
-                            parentId = previousSameLevelItemId,
-                            order = items.count { it.parentId == previousSameLevelItemId }
-                        )
-                    } else if (item.order > items[index].order) {
-                        item.copy(
-                            order = item.order - 1
-                        )
-                    } else {
-                        item
+            items[index].level + 1 -> {
+                items
+                    .filter { item ->
+                        item.parentId == items[index].parentId
                     }
-                }
-        } else {
-            emptyList()
+                    .map { item ->
+                        return@map when {
+                            item.id == items[index].id -> {
+                                val previousSameLevelItemId = items
+                                    .firstOrNull {
+                                        it.parentId == items[index].parentId && it.order == items[index].order - 1
+                                    }?.id ?: return@map item
+
+                                item.copy(
+                                    parentId = previousSameLevelItemId,
+                                    order = items.count { it.parentId == previousSameLevelItemId }
+                                )
+                            }
+
+                            item.order > items[index].order -> item.copy(order = item.order - 1)
+                            else -> item
+                        }
+                    }
+            }
+
+            else -> emptyList()
         }
     }
 
@@ -230,12 +231,10 @@ private fun List<TaskListItemDto>.getReorderedWhenMovingDownAsChild(
             item.parentId == fromItem.parentId || item.parentId == toItem.id
         }
         .map {
-            return@map if (it.id == fromItem.id) {
-                it.copy(parentId = toItem.id, order = 0)
-            } else if (it.parentId == fromItem.parentId) {
-                it.copy(order = fromLevelOrder++)
-            } else {
-                it.copy(order = toLevelOrder++)
+            return@map when {
+                it.id == fromItem.id -> it.copy(parentId = toItem.id, order = 0)
+                it.parentId == fromItem.parentId -> it.copy(order = fromLevelOrder++)
+                else -> it.copy(order = toLevelOrder++)
             }
         }
 }
@@ -274,12 +273,10 @@ private fun List<TaskListItemDto>.getReorderedWhenMovingUpAsChild(
             item.parentId == fromItem.parentId || item.parentId == toItem.id
         }
         .map {
-            return@map if (it.id == fromItem.id) {
-                it.copy(parentId = toItem.id, order = 0)
-            } else if (it.parentId == fromItem.parentId) {
-                it.copy(order = fromLevelOrder++)
-            } else {
-                it.copy(order = toLevelOrder++)
+            return@map when {
+                it.id == fromItem.id -> it.copy(parentId = toItem.id, order = 0)
+                it.parentId == fromItem.parentId -> it.copy(order = fromLevelOrder++)
+                else -> it.copy(order = toLevelOrder++)
             }
         }
 }

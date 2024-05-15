@@ -129,7 +129,7 @@ class TaskScreenService @Inject constructor(
         itemsMap: MutableMap<Long, MutableList<TaskListItemDto>>
     ) {
         var index = 0
-        while (index < items.size || itemsMap.isNotEmpty()) {
+        while (index < items.size && itemsMap.isNotEmpty()) {
             val itemId = items[index].id
 
             if (!itemsMap.containsKey(itemId)) {
