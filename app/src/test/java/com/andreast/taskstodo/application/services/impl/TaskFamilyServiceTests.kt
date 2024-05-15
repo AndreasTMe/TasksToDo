@@ -18,7 +18,7 @@ class TaskFamilyServiceTests {
         )
 
         // Act
-        val result = sut.getParentAndChildren(parentId, items)
+        val result = sut.getParentAndDescendants(parentId, items)
 
         // Assert
         assert(result.isEmpty())
@@ -31,7 +31,7 @@ class TaskFamilyServiceTests {
         val items = listOf<TaskListItemDto>()
 
         // Act
-        val result = sut.getParentAndChildren(parentId, items)
+        val result = sut.getParentAndDescendants(parentId, items)
 
         // Assert
         assert(result.isEmpty())
@@ -48,7 +48,7 @@ class TaskFamilyServiceTests {
         )
 
         // Act
-        val result = sut.getParentAndChildren(parentId, items)
+        val result = sut.getParentAndDescendants(parentId, items)
 
         // Assert
         assert(result.isNotEmpty())
@@ -69,7 +69,7 @@ class TaskFamilyServiceTests {
         )
 
         // Act
-        val result = sut.getParentAndChildren(parentId, items)
+        val result = sut.getParentAndDescendants(parentId, items)
 
         // Assert
         assert(result.isNotEmpty())
@@ -90,7 +90,7 @@ class TaskFamilyServiceTests {
         )
 
         // Act
-        val result = sut.getParentAndChildrenIds(parentId, items)
+        val result = sut.getParentAndDescendantsIds(parentId, items)
 
         // Assert
         assert(result.isEmpty())
@@ -103,7 +103,7 @@ class TaskFamilyServiceTests {
         val items = listOf<TaskListItemDto>()
 
         // Act
-        val result = sut.getParentAndChildrenIds(parentId, items)
+        val result = sut.getParentAndDescendantsIds(parentId, items)
 
         // Assert
         assert(result.isEmpty())
@@ -120,7 +120,7 @@ class TaskFamilyServiceTests {
         )
 
         // Act
-        val result = sut.getParentAndChildrenIds(parentId, items)
+        val result = sut.getParentAndDescendantsIds(parentId, items)
 
         // Assert
         assert(result.isNotEmpty())
@@ -141,7 +141,7 @@ class TaskFamilyServiceTests {
         )
 
         // Act
-        val result = sut.getParentAndChildrenIds(parentId, items)
+        val result = sut.getParentAndDescendantsIds(parentId, items)
 
         // Assert
         assert(result.isNotEmpty())

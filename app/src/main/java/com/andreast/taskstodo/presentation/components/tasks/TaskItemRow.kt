@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -107,6 +109,7 @@ fun TaskItemRow(
             onCheckedChange = {
                 onCheckTask(task)
             })
+
         Text(
             modifier = Modifier
                 .weight(1f)
@@ -121,6 +124,16 @@ fun TaskItemRow(
             textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
             style = MaterialTheme.typography.bodyMedium
         )
+        if (task.childrenCompletedPercentage in 0f..1f) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(20.dp)
+                    .align(Alignment.CenterVertically),
+                progress = { task.childrenCompletedPercentage },
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        }
         Box {
             IconButton(
                 modifier = Modifier.width(40.dp),

@@ -4,43 +4,54 @@ import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.application.services.ITaskFamilyService
 
 class TaskFamilyService : ITaskFamilyService {
-    override fun getParentAndChildren(
+    override fun getParentAndDescendants(
         parentId: Long,
         items: List<TaskListItemDto>
     ): List<TaskListItemDto> {
-        val parent = items.firstOrNull { it.id == parentId } ?: return emptyList()
-        return listOf(parent) + getChildren(listOf(parent), items)
+        val parent = getParent(parentId, items) ?: return emptyList()
+        return listOf(parent) + getDescendants(listOf(parent), items)
     }
 
-    override fun getParentAndChildrenIds(
+    override fun getParentAndDescendantsIds(
         parentId: Long,
         items: List<TaskListItemDto>
     ): List<Long> {
         if (items.none { it.id == parentId }) {
             return emptyList()
         }
-        return listOf(parentId) + getChildrenIds(listOf(parentId), items)
+        return listOf(parentId) + getDescendantsIds(listOf(parentId), items)
     }
 
-    private fun getChildren(
+    override fun getParent(parentId: Long?, items: List<TaskListItemDto>): TaskListItemDto? {
+        return items.firstOrNull { it.id == parentId }
+    }
+
+    override fun getSiblings(
+        item: TaskListItemDto,
+        items: List<TaskListItemDto>
+    ): List<TaskListItemDto> {
+        return items.filter { it.parentId == item.parentId && it.id != item.id }
+    }
+
+    private fun getDescendants(
         parents: List<TaskListItemDto>,
         items: List<TaskListItemDto>
     ): List<TaskListItemDto> {
-        val children = items.filter { item ->
+        val descendants = items.filter { item ->
             item.parentId in parents.map { it.id }
         }
-        if (children.isEmpty()) {
+        if (descendants.isEmpty()) {
             return emptyList()
         }
 
-        return children + getChildren(children, items)
+        return descendants + getDescendants(descendants, items)
     }
 
-    private fun getChildrenIds(
+    private fun getDescendantsIds(
         parents: List<Long>,
         items: List<TaskListItemDto>
     ): List<Long> {
-        val childrenIds = items
+        val descendantsIds = items
             .filter { item ->
                 item.parentId in parents
             }
@@ -50,10 +61,10 @@ class TaskFamilyService : ITaskFamilyService {
             ?.map {
                 it.id
             }
-        if (childrenIds.isNullOrEmpty()) {
+        if (descendantsIds.isNullOrEmpty()) {
             return emptyList()
         }
 
-        return childrenIds + getChildrenIds(childrenIds, items)
+        return descendantsIds + getDescendantsIds(descendantsIds, items)
     }
 }

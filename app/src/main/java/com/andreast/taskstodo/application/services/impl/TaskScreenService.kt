@@ -4,6 +4,7 @@ import com.andreast.taskstodo.application.dto.TaskListDto
 import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.application.persistence.ITasksRepository
 import com.andreast.taskstodo.application.services.ITaskScreenService
+import com.andreast.taskstodo.application.utils.Level
 import com.andreast.taskstodo.application.utils.mappers.TaskListItemMappers
 import com.andreast.taskstodo.application.utils.mappers.TaskListMappers
 import com.andreast.taskstodo.domain.TaskListItem
@@ -37,7 +38,7 @@ class TaskScreenService @Inject constructor(
         val taskListParentItems = getTaskListItemsWithoutParent(taskListItemList)
         val taskListChildrenMap = mapTaskListItemsWithParent(taskListItemList)
 
-        populateTaskListItemsChildrenRecursive(taskListParentItems, taskListChildrenMap)
+        populateTaskListItemsChildren(taskListParentItems, taskListChildrenMap)
 
         return taskListParentItems
     }
@@ -124,35 +125,75 @@ class TaskScreenService @Inject constructor(
         return taskListItemsMap
     }
 
-    private fun populateTaskListItemsChildrenRecursive(
+    private fun populateTaskListItemsChildren(
         items: MutableList<TaskListItemDto>,
         itemsMap: MutableMap<Long, MutableList<TaskListItemDto>>
     ) {
-        var index = 0
-        while (index < items.size && itemsMap.isNotEmpty()) {
-            val itemId = items[index].id
+        var maxLevel = Level.None
+        var i = 0
+        while (i < items.size && itemsMap.isNotEmpty()) {
+            val itemId = items[i].id
 
             if (!itemsMap.containsKey(itemId)) {
-                index++
+                i++
                 continue
             }
 
+            val itemLevel = items[i].level + 1
+            if (maxLevel < itemLevel) {
+                maxLevel = itemLevel
+            }
+
             items.addAll(
-                index + 1,
+                i + 1,
                 itemsMap[itemId]!!
                     .sortedBy {
                         it.order
                     }
                     .map {
                         it.copy(
-                            level = items[index].level + 1,
-                            parentLevel = items[index].level
+                            level = itemLevel,
+                            parentLevel = itemLevel - 1
                         )
                     }
             )
             itemsMap.remove(itemId)
 
-            index++
+            i++
+        }
+
+        while (maxLevel > Level.Zero) {
+            items
+                .filter {
+                    it.level == maxLevel
+                }
+                .also { itemsAtLevel ->
+                    val indices = itemsAtLevel
+                        .map {
+                            it.parentId
+                        }
+                        .distinct()
+                        .map { parentId ->
+                            items.indexOfFirst { it.id == parentId }
+                        }
+
+                    for (index in indices) {
+                        val children = itemsAtLevel
+                            .filter {
+                                it.parentId == items[index].id
+                            }
+
+                        items[index] = items[index].copy(
+                            childrenCompletedPercentage = children
+                                .count {
+                                    it.isCompleted
+                                }
+                                .toFloat() / children.size
+                        )
+                    }
+                }
+
+            maxLevel -= 1
         }
     }
 }

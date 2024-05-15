@@ -85,7 +85,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListItemCompletedState(id: Long, isCompleted: Boolean) {
-        val items = taskFamilyService.getParentAndChildren(
+        val items = taskFamilyService.getParentAndDescendants(
             id,
             _uiState.value.items,
         )
@@ -94,9 +94,23 @@ class TaskListScreenViewModel @AssistedInject constructor(
             return
         }
 
-        taskScreenService.updateTaskListItemsCompletedState(
-            items.map { item -> item.copy(isCompleted = isCompleted) }
-        )
+        val parent = items[0]
+        val parentSiblings = taskFamilyService.getSiblings(parent, _uiState.value.items)
+
+        if (parentSiblings.all { it.isCompleted }) {
+            taskFamilyService.getParent(parent.parentId, _uiState.value.items)
+                ?.let { grandparent ->
+                    taskScreenService.updateTaskListItemsCompletedState(
+                        listOf(grandparent.copy(isCompleted = isCompleted))
+                                + items.map { item -> item.copy(isCompleted = isCompleted) }
+                    )
+                }
+        } else {
+            taskScreenService.updateTaskListItemsCompletedState(
+                items.map { item -> item.copy(isCompleted = isCompleted) }
+            )
+        }
+
         refreshScreen()
     }
 
@@ -140,7 +154,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListItemDelete(id: Long) {
-        val ids = taskFamilyService.getParentAndChildrenIds(
+        val ids = taskFamilyService.getParentAndDescendantsIds(
             id,
             _uiState.value.items,
         )
