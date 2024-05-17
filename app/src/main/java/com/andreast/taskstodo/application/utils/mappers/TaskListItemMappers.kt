@@ -18,7 +18,7 @@ class TaskListItemMappers {
                 title = entity.title,
                 level = Level.Zero,
                 order = entity.order,
-                isCompleted = entity.isCompleted,
+                completedPercentage = if (entity.isCompleted) 100 else 0,
             )
         }
 
@@ -29,7 +29,7 @@ class TaskListItemMappers {
                 taskListId = dto.taskListId,
                 title = dto.title,
                 order = dto.order,
-                isCompleted = dto.isCompleted
+                isCompleted = dto.isCompleted,
             )
         }
 

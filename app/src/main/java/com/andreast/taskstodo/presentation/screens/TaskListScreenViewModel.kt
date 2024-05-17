@@ -104,7 +104,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
                         val ancestorsToUpdate = mutableListOf<TaskListItemDto>()
 
                         for (ancestor in ancestors) {
-                            ancestorsToUpdate.add(ancestor.copy(isCompleted = isCompleted))
+                            ancestorsToUpdate.add(ancestor.toggle(isCompleted))
 
                             siblings = taskFamilyService.getSiblings(
                                 ancestor,
@@ -118,17 +118,17 @@ class TaskListScreenViewModel @AssistedInject constructor(
 
                         taskScreenService.updateTaskListItemsCompletedState(
                             ancestorsToUpdate +
-                                    currentAndChildren.map { item -> item.copy(isCompleted = isCompleted) }
+                                    currentAndChildren.map { item -> item.toggle(isCompleted) }
                         )
                     } else {
                         taskScreenService.updateTaskListItemsCompletedState(
-                            currentAndChildren.map { item -> item.copy(isCompleted = isCompleted) }
+                            currentAndChildren.map { item -> item.toggle(isCompleted) }
                         )
                     }
                 }
         } else {
             taskScreenService.updateTaskListItemsCompletedState(
-                currentAndChildren.map { item -> item.copy(isCompleted = isCompleted) }
+                currentAndChildren.map { item -> item.toggle(isCompleted) }
             )
         }
 
@@ -146,7 +146,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
         }
 
         taskScreenService.updateTaskListItemsCompletedState(
-            items.map { item -> item.copy(isCompleted = false) }
+            items.map { item -> item.toggle(false) }
         )
         refreshScreen()
     }

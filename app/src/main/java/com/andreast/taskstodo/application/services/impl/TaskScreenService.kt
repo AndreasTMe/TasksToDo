@@ -173,13 +173,9 @@ class TaskScreenService @Inject constructor(
             for (i in 0..<items.size) {
                 if (filteredItems.containsKey(items[i].id)) {
                     val children = filteredItems[items[i].id]!!
-                    val completed = children.count { it.isCompleted }
-                    val partiallyCompleted = children
-                        .filter { !it.isCompleted && it.childrenCompletedPercentage >= 0.0f }
-                        .sumOf { it.childrenCompletedPercentage }
 
                     items[i] = items[i].copy(
-                        childrenCompletedPercentage = (completed + partiallyCompleted) / children.size
+                        completedPercentage = children.sumOf { it.completedPercentage } / children.size
                     )
                 }
             }
@@ -187,12 +183,4 @@ class TaskScreenService @Inject constructor(
             level -= 1
         }
     }
-}
-
-private fun <E> List<E>.sumOf(predicate: (E) -> Float): Float {
-    var sum: Float = 0.0f
-    for (element in this) {
-        sum += predicate(element)
-    }
-    return sum
 }

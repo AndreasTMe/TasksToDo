@@ -10,9 +10,19 @@ data class TaskListItemDto(
     val title: String = "",
     val level: Level = Level.Zero,
     val order: Int = 0,
-    val isCompleted: Boolean = false,
+    val completedPercentage: Int = 0,
     val isExpanded: Boolean = false,
     val isHidden: Boolean = false,
     val hasChildren: Boolean = false,
-    val childrenCompletedPercentage: Float = -1.0f,
-)
+) {
+    val isCompleted
+        get() = completedPercentage == 100
+
+    fun toggle(value: Boolean? = null): TaskListItemDto {
+        return if (value == null) {
+            this.copy(completedPercentage = if (isCompleted) 0 else 100)
+        } else {
+            this.copy(completedPercentage = if (value) 100 else 0)
+        }
+    }
+}

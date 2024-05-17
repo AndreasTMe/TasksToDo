@@ -151,7 +151,7 @@ fun TaskItemRow(
             textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
             style = MaterialTheme.typography.bodyMedium
         )
-        if (task.childrenCompletedPercentage in 0f..1f) {
+        if (task.hasChildren && task.completedPercentage in 0..100) {
             Box(
                 modifier = Modifier
                     .size(30.dp)
@@ -161,7 +161,7 @@ fun TaskItemRow(
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(if (task.level == Level.Zero) 30.dp else 20.dp),
-                    progress = { task.childrenCompletedPercentage },
+                    progress = { task.completedPercentage * 0.01f },
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.primaryContainer
                 )
