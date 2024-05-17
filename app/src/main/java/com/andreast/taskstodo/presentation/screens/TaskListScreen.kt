@@ -208,6 +208,10 @@ fun TaskListScreen(
                     state = lazyListState
                 ) {
                     itemsIndexed(taskScreenState.value.items) { index, item ->
+                        if (item.isHidden) {
+                            return@itemsIndexed
+                        }
+
                         if (index == dropItemIndex.intValue
                             && lazyListItemInfo.value != null && index < lazyListItemInfo.value!!.index
                         ) {
@@ -266,6 +270,14 @@ fun TaskListScreen(
                                     taskListScreenViewModel.handleTaskListItemLevelChange(
                                         index,
                                         level
+                                    )
+                                }
+                            },
+                            onExpandSubtasks = { isExpanded ->
+                                coroutineScope.launch {
+                                    taskListScreenViewModel.handleTaskListItemExpandedState(
+                                        index,
+                                        isExpanded
                                     )
                                 }
                             }

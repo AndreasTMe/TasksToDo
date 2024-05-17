@@ -2,6 +2,7 @@ package com.andreast.taskstodo.application.services.impl
 
 import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.application.services.ITaskFamilyService
+import com.andreast.taskstodo.application.utils.Level
 
 class TaskFamilyService : ITaskFamilyService {
     override fun getParentAndDescendants(
@@ -20,6 +21,33 @@ class TaskFamilyService : ITaskFamilyService {
             return emptyList()
         }
         return listOf(parentId) + getDescendantsIds(listOf(parentId), items)
+    }
+
+    override fun getAncestors(id: Long, items: List<TaskListItemDto>): List<TaskListItemDto> {
+        val index = items.indexOfFirst { it.id == id }
+        if (index == -1 || items[index].level == Level.Zero) {
+            return emptyList()
+        }
+
+        val ancestors = mutableListOf<TaskListItemDto>()
+        var parentLevel = items[index].level - 1
+        for (i in index - 1 downTo 0) {
+            if (items[i].level == parentLevel) {
+                ancestors.add(items[i])
+                parentLevel -= 1
+            }
+
+            if (parentLevel < 0) {
+                break
+            }
+        }
+
+        return ancestors
+    }
+
+    override fun getDescendants(id: Long, items: List<TaskListItemDto>): List<TaskListItemDto> {
+        val item = items.firstOrNull { it.id == id } ?: return emptyList()
+        return getDescendants(listOf(item), items)
     }
 
     override fun getParent(parentId: Long?, items: List<TaskListItemDto>): TaskListItemDto? {

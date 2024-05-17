@@ -85,29 +85,50 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     suspend fun handleTaskListItemCompletedState(id: Long, isCompleted: Boolean) {
-        val items = taskFamilyService.getParentAndDescendants(
+        val currentAndChildren = taskFamilyService.getParentAndDescendants(
             id,
             _uiState.value.items,
         )
 
-        if (items.isEmpty()) {
+        if (currentAndChildren.isEmpty()) {
             return
         }
 
-        val parent = items[0]
-        val parentSiblings = taskFamilyService.getSiblings(parent, _uiState.value.items)
+        val current = currentAndChildren[0]
+        var siblings = taskFamilyService.getSiblings(current, _uiState.value.items)
 
-        if (parentSiblings.all { it.isCompleted }) {
-            taskFamilyService.getParent(parent.parentId, _uiState.value.items)
-                ?.let { grandparent ->
-                    taskScreenService.updateTaskListItemsCompletedState(
-                        listOf(grandparent.copy(isCompleted = isCompleted))
-                                + items.map { item -> item.copy(isCompleted = isCompleted) }
-                    )
+        if (siblings.all { it.isCompleted }) {
+            taskFamilyService.getAncestors(current.id, _uiState.value.items)
+                .let { ancestors ->
+                    if (ancestors.isNotEmpty()) {
+                        val ancestorsToUpdate = mutableListOf<TaskListItemDto>()
+
+                        for (ancestor in ancestors) {
+                            ancestorsToUpdate.add(ancestor.copy(isCompleted = isCompleted))
+
+                            siblings = taskFamilyService.getSiblings(
+                                ancestor,
+                                _uiState.value.items
+                            )
+
+                            if (siblings.any { !it.isCompleted }) {
+                                break
+                            }
+                        }
+
+                        taskScreenService.updateTaskListItemsCompletedState(
+                            ancestorsToUpdate +
+                                    currentAndChildren.map { item -> item.copy(isCompleted = isCompleted) }
+                        )
+                    } else {
+                        taskScreenService.updateTaskListItemsCompletedState(
+                            currentAndChildren.map { item -> item.copy(isCompleted = isCompleted) }
+                        )
+                    }
                 }
         } else {
             taskScreenService.updateTaskListItemsCompletedState(
-                items.map { item -> item.copy(isCompleted = isCompleted) }
+                currentAndChildren.map { item -> item.copy(isCompleted = isCompleted) }
             )
         }
 
@@ -247,5 +268,21 @@ class TaskListScreenViewModel @AssistedInject constructor(
         taskScreenService.updateTaskListItemTitle(_uiState.value.selectedItem!!.id, title)
 
         return true
+    }
+
+    suspend fun handleTaskListItemExpandedState(index: Int, isExpanded: Boolean) {
+        if (index !in 0..<_uiState.value.items.size) {
+            return
+        }
+
+        val item = _uiState.value.items[index]
+
+        if (!item.hasChildren) {
+            return
+        }
+
+        // TODO(implement)
+
+        refreshScreen()
     }
 }

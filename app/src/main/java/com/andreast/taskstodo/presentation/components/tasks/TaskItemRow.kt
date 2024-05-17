@@ -15,6 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -48,9 +50,11 @@ fun TaskItemRow(
     onEditTask: (task: TaskListItemDto) -> Unit = { },
     onDeleteTask: (task: TaskListItemDto) -> Unit = { },
     onAddSubTask: (parent: TaskListItemDto) -> Unit = { },
-    onLevelChange: (level: Level) -> Unit = { }
+    onLevelChange: (level: Level) -> Unit = { },
+    onExpandSubtasks: (isExpanded: Boolean) -> Unit = { }
 ) {
     val dragState = remember { mutableIntStateOf(0) }
+    val interactionSource = remember { MutableInteractionSource() }
     val isDropdownExpanded = remember { mutableStateOf(false) }
 
     val paddingStart = animateDpAsState(
@@ -103,6 +107,29 @@ fun TaskItemRow(
                 )
             }
     ) {
+        if (task.hasChildren) {
+            Box(
+                modifier = Modifier
+                    .width(20.dp)
+                    .align(Alignment.CenterVertically)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) {
+                        onExpandSubtasks(!task.isExpanded)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (task.isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = "Task Options"
+                )
+            }
+        } else {
+            Box(
+                modifier = Modifier.width(20.dp)
+            )
+        }
         Checkbox(
             modifier = Modifier.width(40.dp),
             checked = task.isCompleted,
@@ -115,7 +142,7 @@ fun TaskItemRow(
                 .weight(1f)
                 .align(Alignment.CenterVertically)
                 .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
+                    interactionSource = interactionSource,
                     indication = null
                 ) {
                     onCheckTask(task)
@@ -125,14 +152,20 @@ fun TaskItemRow(
             style = MaterialTheme.typography.bodyMedium
         )
         if (task.childrenCompletedPercentage in 0f..1f) {
-            CircularProgressIndicator(
+            Box(
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(30.dp)
                     .align(Alignment.CenterVertically),
-                progress = { task.childrenCompletedPercentage },
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.primaryContainer
-            )
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(if (task.level == Level.Zero) 30.dp else 20.dp),
+                    progress = { task.childrenCompletedPercentage },
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            }
         }
         Box {
             IconButton(
@@ -151,23 +184,25 @@ fun TaskItemRow(
                     isDropdownExpanded.value = false
                 }
             ) {
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(Icons.Filled.Add, contentDescription = "Add sub-task")
-                    },
-                    text = {
-                        Text(
-                            text = "Add sub-task",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    },
-                    onClick = {
-                        onAddSubTask(task)
-                        isDropdownExpanded.value = false
-                    }
-                )
+                if (task.level < Level.maxValue()) {
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(Icons.Filled.Add, contentDescription = "Add sub-task")
+                        },
+                        text = {
+                            Text(
+                                text = "Add sub-task",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        },
+                        onClick = {
+                            onAddSubTask(task)
+                            isDropdownExpanded.value = false
+                        }
+                    )
 
-                DropdownDivider()
+                    DropdownDivider()
+                }
 
                 DropdownMenuItem(
                     leadingIcon = {

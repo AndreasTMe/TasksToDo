@@ -39,6 +39,7 @@ class TaskScreenService @Inject constructor(
         val taskListChildrenMap = mapTaskListItemsWithParent(taskListItemList)
 
         populateTaskListItemsChildren(taskListParentItems, taskListChildrenMap)
+        calculateCompletedPercentages(taskListParentItems)
 
         return taskListParentItems
     }
@@ -129,71 +130,69 @@ class TaskScreenService @Inject constructor(
         items: MutableList<TaskListItemDto>,
         itemsMap: MutableMap<Long, MutableList<TaskListItemDto>>
     ) {
-        var maxLevel = Level.None
         var i = 0
         while (i < items.size && itemsMap.isNotEmpty()) {
-            val itemId = items[i].id
+            val item = items[i]
 
-            if (!itemsMap.containsKey(itemId)) {
+            if (!itemsMap.containsKey(item.id)) {
                 i++
                 continue
             }
 
-            val itemLevel = items[i].level + 1
-            if (maxLevel < itemLevel) {
-                maxLevel = itemLevel
-            }
-
             items.addAll(
                 i + 1,
-                itemsMap[itemId]!!
+                itemsMap[item.id]!!
                     .sortedBy {
                         it.order
                     }
                     .map {
                         it.copy(
-                            level = itemLevel,
-                            parentLevel = itemLevel - 1
+                            level = item.level + 1,
+                            parentLevel = item.level
                         )
                     }
             )
-            itemsMap.remove(itemId)
+            itemsMap.remove(item.id)
+            items[i] = item.copy(hasChildren = true)
 
             i++
         }
+    }
 
-        while (maxLevel > Level.Zero) {
-            items
-                .filter {
-                    it.level == maxLevel
-                }
-                .also { itemsAtLevel ->
-                    val indices = itemsAtLevel
-                        .map {
-                            it.parentId
-                        }
-                        .distinct()
-                        .map { parentId ->
-                            items.indexOfFirst { it.id == parentId }
-                        }
-
-                    for (index in indices) {
-                        val children = itemsAtLevel
-                            .filter {
-                                it.parentId == items[index].id
-                            }
-
-                        items[index] = items[index].copy(
-                            childrenCompletedPercentage = children
-                                .count {
-                                    it.isCompleted
-                                }
-                                .toFloat() / children.size
-                        )
+    private fun calculateCompletedPercentages(items: MutableList<TaskListItemDto>) {
+        var level = Level.max()
+        while (level > Level.Zero) {
+            val filteredItems = items
+                .filter { it.level == level }
+                .let { list ->
+                    list.associate { item ->
+                        item.parentId to list.filter { it.parentId == item.parentId }
                     }
                 }
 
-            maxLevel -= 1
+            for (i in 0..<items.size) {
+                if (filteredItems.containsKey(items[i].id)) {
+                    val children = filteredItems[items[i].id]!!
+                    val completed = children.count { it.isCompleted }
+                    val partiallyCompleted = children
+                        .filter { !it.isCompleted && it.childrenCompletedPercentage >= 0.0f }
+                        .sumOf { it.childrenCompletedPercentage }
+
+                    items[i] = items[i].copy(
+                        childrenCompletedPercentage = (completed + partiallyCompleted) / children.size
+                    )
+                }
+            }
+
+            level -= 1
         }
     }
+}
+
+private fun <E> List<E>.sumOf(predicate: (E) -> Float): Float {
+    var sum: Float = 0.0f
+    for (element in this) {
+        sum += predicate(element)
+    }
+    return sum
 }

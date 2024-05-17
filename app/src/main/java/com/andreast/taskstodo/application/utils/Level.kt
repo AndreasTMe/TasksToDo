@@ -14,6 +14,10 @@ enum class Level(private val value: Int) {
             return l1.value + l2.value
         }
 
+        fun max(): Level {
+            return entries.maxOf { it }
+        }
+
         fun maxValue(): Int {
             return entries.maxOf { it.value }
         }
