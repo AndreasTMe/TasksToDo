@@ -281,7 +281,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
             return
         }
 
-        // TODO(implement)
+        taskScreenService.updateTaskListItemExpandedState(item.copy(isExpanded = isExpanded))
 
         refreshScreen()
     }

@@ -8,6 +8,7 @@ import com.andreast.taskstodo.application.utils.Level
 import com.andreast.taskstodo.application.utils.mappers.TaskListItemMappers
 import com.andreast.taskstodo.application.utils.mappers.TaskListMappers
 import com.andreast.taskstodo.domain.TaskListItem
+import java.util.Stack
 import java.util.stream.Collectors
 import javax.inject.Inject
 
@@ -40,6 +41,7 @@ class TaskScreenService @Inject constructor(
 
         populateTaskListItemsChildren(taskListParentItems, taskListChildrenMap)
         calculateCompletedPercentages(taskListParentItems)
+        hideItemsBasedOnExpandedState(taskListParentItems)
 
         return taskListParentItems
     }
@@ -84,6 +86,22 @@ class TaskScreenService @Inject constructor(
         )
     }
 
+    override suspend fun updateTaskListItemExpandedState(item: TaskListItemDto) {
+        repository.updateTaskListItems(
+            TaskListItemMappers.onlyIdAndIsExpandedToEntity(item.id, item.isExpanded)
+        )
+    }
+
+    override suspend fun updateTaskListItemsExpandedState(items: List<TaskListItemDto>) {
+        repository.updateTaskListItems(
+            *items
+                .map {
+                    TaskListItemMappers.onlyIdAndIsExpandedToEntity(it.id, it.isExpanded)
+                }
+                .toTypedArray()
+        )
+    }
+
     override suspend fun deleteTaskListById(id: Long) {
         repository.deleteTaskListById(id)
     }
@@ -102,7 +120,7 @@ class TaskScreenService @Inject constructor(
                 a.order.compareTo(b.order)
             }
             .map {
-                return@map TaskListItemMappers.entityToDto(it)
+                return@map TaskListItemMappers.entityToDto(it, false)
             }
             .collect(Collectors.toList())
     }
@@ -181,6 +199,36 @@ class TaskScreenService @Inject constructor(
             }
 
             level -= 1
+        }
+    }
+
+    private fun hideItemsBasedOnExpandedState(items: MutableList<TaskListItemDto>) {
+        val state = Stack<Pair<Level, Boolean>>()
+        state.push(Pair(items[0].level, items[0].isExpanded))
+
+        var i = 1
+        while (i < items.size) {
+            if (items[i].level > state.peek().first) {
+                if (state.peek().second && !items[i].isExpanded) {
+                    items[i] = items[i].copy(isHidden = false)
+
+                    if (items[i].hasChildren) {
+                        state.push(Pair(items[i].level, items[i].isExpanded))
+                    }
+                } else {
+                    items[i] = items[i].copy(isHidden = !state.peek().second)
+                }
+            } else {
+                if (state.isNotEmpty()) {
+                    state.pop()
+                    if (state.isNotEmpty()) {
+                        items[i] = items[i].copy(isHidden = !state.peek().second)
+                    }
+                }
+                state.push(Pair(items[i].level, items[i].isExpanded))
+            }
+
+            i++
         }
     }
 }

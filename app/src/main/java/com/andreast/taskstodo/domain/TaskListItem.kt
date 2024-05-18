@@ -14,6 +14,7 @@ object TaskListItemTable {
     const val COLUMN_TITLE = "title"
     const val COLUMN_ORDER = "order"
     const val COLUMN_IS_COMPLETED = "is_completed"
+    const val COLUMN_IS_EXPANDED = "is_expanded"
 }
 
 @Entity(tableName = TaskListItemTable.NAME)
@@ -35,7 +36,10 @@ data class TaskListItem(
     val order: Int,
 
     @ColumnInfo(name = TaskListItemTable.COLUMN_IS_COMPLETED)
-    val isCompleted: Boolean
+    val isCompleted: Boolean,
+
+    @ColumnInfo(name = TaskListItemTable.COLUMN_IS_EXPANDED)
+    val isExpanded: Boolean
 )
 
 data class TaskListItemIdAndTitle(
@@ -63,4 +67,12 @@ data class TaskListItemIdAndIsCompleted(
 
     @ColumnInfo(name = TaskListItemTable.COLUMN_IS_COMPLETED)
     val isCompleted: Boolean
+) : InsteadOf<TaskListItem>
+
+data class TaskListItemIdAndIsExpanded(
+    @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
+    val id: Long = 0,
+
+    @ColumnInfo(name = TaskListItemTable.COLUMN_IS_EXPANDED)
+    val isExpanded: Boolean
 ) : InsteadOf<TaskListItem>

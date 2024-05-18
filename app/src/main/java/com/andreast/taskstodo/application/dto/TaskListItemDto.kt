@@ -12,7 +12,7 @@ data class TaskListItemDto(
     val order: Int = 0,
     val completedPercentage: Int = 0,
     val isExpanded: Boolean = false,
-    val isHidden: Boolean = false,
+    val isHidden: Boolean = true,
     val hasChildren: Boolean = false,
 ) {
     val isCompleted
