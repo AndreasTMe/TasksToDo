@@ -5,7 +5,6 @@ import com.andreast.taskstodo.application.utils.InsteadOf
 import com.andreast.taskstodo.domain.TaskList
 import com.andreast.taskstodo.domain.TaskListItem
 import com.andreast.taskstodo.domain.TaskListItemIdAndIsCompleted
-import com.andreast.taskstodo.domain.TaskListItemIdAndIsExpanded
 import com.andreast.taskstodo.domain.TaskListItemIdAndTitle
 import com.andreast.taskstodo.domain.TaskListItemIdParentIdAndOrder
 import com.andreast.taskstodo.infrastructure.persistence.dataaccess.TaskListDao
@@ -66,14 +65,6 @@ class TasksRepository @Inject constructor(
                 *taskListItems
                     .map {
                         it as TaskListItemIdAndIsCompleted
-                    }
-                    .toTypedArray()
-            )
-
-            is TaskListItemIdAndIsExpanded -> taskListItemDao.updateExpandedStates(
-                *taskListItems
-                    .map {
-                        it as TaskListItemIdAndIsExpanded
                     }
                     .toTypedArray()
             )

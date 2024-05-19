@@ -57,6 +57,8 @@ fun TaskListScreen(
     navHostController: NavHostController
 ) {
     val taskScreenState = taskListScreenViewModel.uiState.collectAsState()
+    val expandedState = taskListScreenViewModel.expandedState.collectAsState()
+    val hiddenState = taskListScreenViewModel.hiddenState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
@@ -208,7 +210,7 @@ fun TaskListScreen(
                     state = lazyListState
                 ) {
                     itemsIndexed(taskScreenState.value.items) { index, item ->
-                        if (item.isHidden) {
+                        if (hiddenState.value.contains(item.id)) {
                             return@itemsIndexed
                         }
 
@@ -233,6 +235,7 @@ fun TaskListScreen(
                                 else -> MaterialTheme.colorScheme.surface
                             },
                             task = item,
+                            isExpanded = expandedState.value.contains(item.id),
                             onCheckTask = { task ->
                                 if (lazyListItemInfo.value != null) {
                                     return@TaskItemRow
@@ -273,13 +276,8 @@ fun TaskListScreen(
                                     )
                                 }
                             },
-                            onExpandSubtasks = { isExpanded ->
-                                coroutineScope.launch {
-                                    taskListScreenViewModel.handleTaskListItemExpandedState(
-                                        index,
-                                        isExpanded
-                                    )
-                                }
+                            onExpandSubtasks = {
+                                taskListScreenViewModel.handleTaskListItemExpandedState(index)
                             }
                         )
 

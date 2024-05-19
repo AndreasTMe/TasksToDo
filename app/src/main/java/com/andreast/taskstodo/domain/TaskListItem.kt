@@ -2,6 +2,7 @@ package com.andreast.taskstodo.domain
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.andreast.taskstodo.application.utils.InsteadOf
 
@@ -17,7 +18,10 @@ object TaskListItemTable {
     const val COLUMN_IS_EXPANDED = "is_expanded"
 }
 
-@Entity(tableName = TaskListItemTable.NAME)
+@Entity(
+    tableName = TaskListItemTable.NAME,
+    indices = [Index(value = [TaskListItemTable.COLUMN_ID], unique = true)]
+)
 data class TaskListItem(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
@@ -37,9 +41,6 @@ data class TaskListItem(
 
     @ColumnInfo(name = TaskListItemTable.COLUMN_IS_COMPLETED)
     val isCompleted: Boolean,
-
-    @ColumnInfo(name = TaskListItemTable.COLUMN_IS_EXPANDED)
-    val isExpanded: Boolean
 )
 
 data class TaskListItemIdAndTitle(
@@ -67,12 +68,4 @@ data class TaskListItemIdAndIsCompleted(
 
     @ColumnInfo(name = TaskListItemTable.COLUMN_IS_COMPLETED)
     val isCompleted: Boolean
-) : InsteadOf<TaskListItem>
-
-data class TaskListItemIdAndIsExpanded(
-    @ColumnInfo(name = TaskListItemTable.COLUMN_ID)
-    val id: Long = 0,
-
-    @ColumnInfo(name = TaskListItemTable.COLUMN_IS_EXPANDED)
-    val isExpanded: Boolean
 ) : InsteadOf<TaskListItem>

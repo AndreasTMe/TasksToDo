@@ -6,7 +6,6 @@ import androidx.room.Update
 import androidx.room.Upsert
 import com.andreast.taskstodo.domain.TaskListItem
 import com.andreast.taskstodo.domain.TaskListItemIdAndIsCompleted
-import com.andreast.taskstodo.domain.TaskListItemIdAndIsExpanded
 import com.andreast.taskstodo.domain.TaskListItemIdAndTitle
 import com.andreast.taskstodo.domain.TaskListItemIdParentIdAndOrder
 import com.andreast.taskstodo.domain.TaskListItemTable
@@ -34,9 +33,6 @@ interface TaskListItemDao {
 
     @Update(entity = TaskListItem::class)
     suspend fun updateCompletedStates(vararg taskListItems: TaskListItemIdAndIsCompleted)
-
-    @Update(entity = TaskListItem::class)
-    suspend fun updateExpandedStates(vararg taskListItems: TaskListItemIdAndIsExpanded)
 
     @Query("DELETE FROM ${TaskListItemTable.NAME} WHERE ${TaskListItemTable.COLUMN_ID} IN (:ids)")
     suspend fun deleteAllById(ids: List<Long>)

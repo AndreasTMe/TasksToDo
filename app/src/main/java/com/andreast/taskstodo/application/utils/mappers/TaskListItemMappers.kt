@@ -4,13 +4,12 @@ import com.andreast.taskstodo.application.dto.TaskListItemDto
 import com.andreast.taskstodo.application.utils.Level
 import com.andreast.taskstodo.domain.TaskListItem
 import com.andreast.taskstodo.domain.TaskListItemIdAndIsCompleted
-import com.andreast.taskstodo.domain.TaskListItemIdAndIsExpanded
 import com.andreast.taskstodo.domain.TaskListItemIdAndTitle
 import com.andreast.taskstodo.domain.TaskListItemIdParentIdAndOrder
 
 class TaskListItemMappers {
     companion object {
-        fun entityToDto(entity: TaskListItem, isHidden: Boolean = true): TaskListItemDto {
+        fun entityToDto(entity: TaskListItem): TaskListItemDto {
             return TaskListItemDto(
                 id = entity.id,
                 parentId = entity.parentId,
@@ -20,8 +19,6 @@ class TaskListItemMappers {
                 level = Level.Zero,
                 order = entity.order,
                 completedPercentage = if (entity.isCompleted) 100 else 0,
-                isExpanded = entity.isExpanded,
-                isHidden = isHidden
             )
         }
 
@@ -32,8 +29,7 @@ class TaskListItemMappers {
                 taskListId = dto.taskListId,
                 title = dto.title,
                 order = dto.order,
-                isCompleted = dto.isCompleted,
-                isExpanded = dto.isExpanded
+                isCompleted = dto.isCompleted
             )
         }
 
@@ -54,13 +50,6 @@ class TaskListItemMappers {
             isCompleted: Boolean
         ): TaskListItemIdAndIsCompleted {
             return TaskListItemIdAndIsCompleted(id, isCompleted)
-        }
-
-        fun onlyIdAndIsExpandedToEntity(
-            id: Long,
-            isExpanded: Boolean
-        ): TaskListItemIdAndIsExpanded {
-            return TaskListItemIdAndIsExpanded(id, isExpanded)
         }
     }
 }

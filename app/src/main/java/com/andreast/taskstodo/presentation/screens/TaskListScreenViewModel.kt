@@ -13,7 +13,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -44,26 +43,33 @@ class TaskListScreenViewModel @AssistedInject constructor(
     }
 
     private val _uiState = MutableStateFlow(TaskListScreenState())
-    private val _isDeleted = MutableStateFlow(false)
+    private val _expandedState = MutableStateFlow(setOf<Long>())
+    private val _hiddenState = MutableStateFlow(setOf<Long>())
 
-    val uiState: StateFlow<TaskListScreenState> = _uiState.asStateFlow()
+    val uiState = _uiState.asStateFlow()
+    val expandedState = _expandedState.asStateFlow()
+    val hiddenState = _hiddenState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            refreshScreen()
+            refreshTasks()
+
+            _hiddenState.value = _uiState.value.items
+                .filter { it.parentId != null }
+                .map { it.id }
+                .toSet()
         }
     }
 
-    private suspend fun refreshScreen() {
-        if (_isDeleted.value) {
-            _uiState.value = TaskListScreenState()
-            return
-        }
-
+    private suspend fun refreshTasks() {
         _uiState.value = TaskListScreenState(
             list = taskScreenService.getTaskListById(taskListId),
             items = taskScreenService.getTaskListItemsByListId(taskListId)
         )
+    }
+
+    private fun clearTasks() {
+        _uiState.value = TaskListScreenState()
     }
 
     fun selectItem(taskListItem: TaskListItemDto?, screenAction: TaskListScreenAction) {
@@ -81,7 +87,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
         }
 
         taskScreenService.upsertTaskList(_uiState.value.list.copy(title = titleNoWhitespace))
-        refreshScreen()
+        refreshTasks()
     }
 
     suspend fun handleTaskListItemCompletedState(id: Long, isCompleted: Boolean) {
@@ -132,7 +138,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
             )
         }
 
-        refreshScreen()
+        refreshTasks()
     }
 
     suspend fun handleTaskListUncheckCompleted() {
@@ -148,7 +154,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
         taskScreenService.updateTaskListItemsCompletedState(
             items.map { item -> item.toggle(false) }
         )
-        refreshScreen()
+        refreshTasks()
     }
 
     suspend fun handleTaskListRemoveCompleted() {
@@ -165,13 +171,12 @@ class TaskListScreenViewModel @AssistedInject constructor(
         }
 
         taskScreenService.deleteTaskListItemsByIds(ids)
-        refreshScreen()
+        refreshTasks()
     }
 
     suspend fun handleTaskListDelete() {
         taskScreenService.deleteTaskListById(_uiState.value.list.id)
-        _isDeleted.value = true
-        refreshScreen()
+        clearTasks()
     }
 
     suspend fun handleTaskListItemDelete(id: Long) {
@@ -185,7 +190,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
         }
 
         taskScreenService.deleteTaskListItemsByIds(ids)
-        refreshScreen()
+        refreshTasks()
     }
 
     suspend fun handleTaskListScreenAction(title: String) {
@@ -207,7 +212,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
             handleTaskListItemAdd(titleNoWhitespace)
         }
 
-        refreshScreen()
+        refreshTasks()
     }
 
     suspend fun handleTaskListReorder(from: Int, to: Int) {
@@ -217,7 +222,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
         }
 
         taskScreenService.updateTaskListItemParentIdAndOrder(reordered)
-        refreshScreen()
+        refreshTasks()
     }
 
     suspend fun handleTaskListItemLevelChange(index: Int, level: Level) {
@@ -235,7 +240,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
         }
 
         taskScreenService.updateTaskListItemParentIdAndOrder(reordered)
-        refreshScreen()
+        refreshTasks()
     }
 
     private suspend fun handleTaskListItemAdd(title: String) {
@@ -270,19 +275,46 @@ class TaskListScreenViewModel @AssistedInject constructor(
         return true
     }
 
-    suspend fun handleTaskListItemExpandedState(index: Int, isExpanded: Boolean) {
+    fun handleTaskListItemExpandedState(index: Int) {
         if (index !in 0..<_uiState.value.items.size) {
             return
         }
 
-        val item = _uiState.value.items[index]
+        val current = _uiState.value.items[index]
 
-        if (!item.hasChildren) {
+        if (!current.hasChildren) {
             return
         }
 
-        taskScreenService.updateTaskListItemExpandedState(item.copy(isExpanded = isExpanded))
+        if (_expandedState.value.contains(current.id)) {
+            _expandedState.value = _expandedState.value.minus(current.id)
+            _hiddenState.value = _hiddenState.value.plus(
+                taskFamilyService.getDescendants(current.id, _uiState.value.items).map { it.id }
+            )
+        } else {
+            _expandedState.value = _expandedState.value.plus(current.id)
 
-        refreshScreen()
+            taskFamilyService.getDescendants(current.id, _uiState.value.items)
+                .let { descendants ->
+                    val itemsToShow = mutableSetOf<Long>()
+
+                    for (descendant in descendants) {
+                        if (descendant.parentId == current.id) {
+                            itemsToShow.add(descendant.id)
+                        }
+
+                        if (_expandedState.value.contains(descendant.parentId)
+                            && taskFamilyService.getAncestors(
+                                descendant.parentId!!,
+                                _uiState.value.items
+                            ).all { _expandedState.value.contains(it.id) }
+                        ) {
+                            itemsToShow.add(descendant.id)
+                        }
+                    }
+
+                    _hiddenState.value = _hiddenState.value.minus(itemsToShow)
+                }
+        }
     }
 }

@@ -11,8 +11,6 @@ data class TaskListItemDto(
     val level: Level = Level.Zero,
     val order: Int = 0,
     val completedPercentage: Int = 0,
-    val isExpanded: Boolean = false,
-    val isHidden: Boolean = true,
     val hasChildren: Boolean = false,
 ) {
     val isCompleted

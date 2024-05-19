@@ -2,6 +2,7 @@ package com.andreast.taskstodo.infrastructure.persistence
 
 import android.content.Context
 import androidx.room.Room
+import com.andreast.taskstodo.BuildConfig
 import com.andreast.taskstodo.application.persistence.ITasksRepository
 import com.andreast.taskstodo.infrastructure.persistence.dataaccess.TaskListDao
 import com.andreast.taskstodo.infrastructure.persistence.dataaccess.TaskListItemDao
@@ -20,11 +21,17 @@ object ActivityConfiguration {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): TasksToDoDatabase {
-        return Room.databaseBuilder(
+        val builder = Room.databaseBuilder(
             context,
             TasksToDoDatabase::class.java,
             DATABASE_NAME
-        ).build()
+        )
+
+        if (BuildConfig.DEBUG) {
+            builder.createFromAsset("database/${DATABASE_NAME}.db")
+        }
+
+        return builder.build()
     }
 
     @Provides

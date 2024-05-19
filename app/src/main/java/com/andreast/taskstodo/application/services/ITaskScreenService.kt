@@ -12,8 +12,6 @@ interface ITaskScreenService {
     suspend fun updateTaskListItemTitle(id: Long, title: String)
     suspend fun updateTaskListItemParentIdAndOrder(items: List<TaskListItemDto>)
     suspend fun updateTaskListItemsCompletedState(items: List<TaskListItemDto>)
-    suspend fun updateTaskListItemExpandedState(item: TaskListItemDto)
-    suspend fun updateTaskListItemsExpandedState(items: List<TaskListItemDto>)
     suspend fun deleteTaskListById(id: Long)
     suspend fun deleteTaskListItemsByIds(ids: List<Long>)
 }

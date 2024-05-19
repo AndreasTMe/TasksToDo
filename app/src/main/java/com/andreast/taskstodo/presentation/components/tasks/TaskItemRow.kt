@@ -46,12 +46,13 @@ fun TaskItemRow(
     modifier: Modifier = Modifier,
     background: Color = MaterialTheme.colorScheme.surface,
     task: TaskListItemDto,
+    isExpanded: Boolean? = null,
     onCheckTask: (task: TaskListItemDto) -> Unit = { },
     onEditTask: (task: TaskListItemDto) -> Unit = { },
     onDeleteTask: (task: TaskListItemDto) -> Unit = { },
     onAddSubTask: (parent: TaskListItemDto) -> Unit = { },
     onLevelChange: (level: Level) -> Unit = { },
-    onExpandSubtasks: (isExpanded: Boolean) -> Unit = { }
+    onExpandSubtasks: () -> Unit = { }
 ) {
     val dragState = remember { mutableIntStateOf(0) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -107,7 +108,7 @@ fun TaskItemRow(
                 )
             }
     ) {
-        if (task.hasChildren) {
+        if (isExpanded != null && task.hasChildren) {
             Box(
                 modifier = Modifier
                     .width(20.dp)
@@ -116,12 +117,12 @@ fun TaskItemRow(
                         interactionSource = interactionSource,
                         indication = null
                     ) {
-                        onExpandSubtasks(!task.isExpanded)
+                        onExpandSubtasks()
                     },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (task.isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    imageVector = if (isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                     contentDescription = "Task Options"
                 )
             }
