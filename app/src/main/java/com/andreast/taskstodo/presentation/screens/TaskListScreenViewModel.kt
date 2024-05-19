@@ -61,15 +61,17 @@ class TaskListScreenViewModel @AssistedInject constructor(
         }
     }
 
+    private fun clearState() {
+        _uiState.value = TaskListScreenState()
+        _expandedState.value = setOf()
+        _hiddenState.value = setOf()
+    }
+
     private suspend fun refreshTasks() {
         _uiState.value = TaskListScreenState(
             list = taskScreenService.getTaskListById(taskListId),
             items = taskScreenService.getTaskListItemsByListId(taskListId)
         )
-    }
-
-    private fun clearTasks() {
-        _uiState.value = TaskListScreenState()
     }
 
     fun selectItem(taskListItem: TaskListItemDto?, screenAction: TaskListScreenAction) {
@@ -176,7 +178,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
 
     suspend fun handleTaskListDelete() {
         taskScreenService.deleteTaskListById(_uiState.value.list.id)
-        clearTasks()
+        clearState()
     }
 
     suspend fun handleTaskListItemDelete(id: Long) {
@@ -190,6 +192,10 @@ class TaskListScreenViewModel @AssistedInject constructor(
         }
 
         taskScreenService.deleteTaskListItemsByIds(ids)
+
+        _expandedState.value = _expandedState.value.minus(ids.toSet())
+        _hiddenState.value = _hiddenState.value.minus(ids.toSet())
+
         refreshTasks()
     }
 
@@ -261,6 +267,12 @@ class TaskListScreenViewModel @AssistedInject constructor(
                 order = order
             )
         )
+
+        if (_uiState.value.selectedItem != null) {
+            handleTaskListItemExpandedState(
+                _uiState.value.items.indexOfFirst { it.id == _uiState.value.selectedItem!!.id }
+            )
+        }
     }
 
     private suspend fun handleTaskListItemEdit(title: String): Boolean {
