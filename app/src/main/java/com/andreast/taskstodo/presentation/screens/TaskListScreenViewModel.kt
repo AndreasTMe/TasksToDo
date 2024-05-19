@@ -236,6 +236,7 @@ class TaskListScreenViewModel @AssistedInject constructor(
             return
         }
 
+        val previousLevel = _uiState.value.items[index].level
         val reordered = taskOrderingService.reorderTasksAfterLevelChange(
             index,
             level,
@@ -247,6 +248,14 @@ class TaskListScreenViewModel @AssistedInject constructor(
 
         taskScreenService.updateTaskListItemParentIdAndOrder(reordered)
         refreshTasks()
+
+        val updatedItem = _uiState.value.items[index]
+        if (level > previousLevel
+            && updatedItem.parentId != null
+            && !_expandedState.value.contains(updatedItem.parentId)
+        ) {
+            _hiddenState.value = _hiddenState.value.plus(updatedItem.id)
+        }
     }
 
     private suspend fun handleTaskListItemAdd(title: String) {
