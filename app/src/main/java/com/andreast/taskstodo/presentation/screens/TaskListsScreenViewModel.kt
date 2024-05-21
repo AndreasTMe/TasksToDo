@@ -25,18 +25,33 @@ class TaskListsScreenViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            refreshScreen()
+            refreshLists()
         }
     }
 
-    suspend fun handleTaskListTitleChange(title: String): Long {
-        return taskScreenService.upsertTaskList(TaskListDto(title = title))
-    }
-
-    private suspend fun refreshScreen() {
+    private suspend fun refreshLists() {
         _uiState.value = TaskListsScreenState(
             lists = taskScreenService.getAllTaskLists()
         )
+    }
+
+    suspend fun handleTaskListTitleChange(id: Long? = null, title: String): Long {
+        return if (id == null) {
+            taskScreenService.upsertTaskList(TaskListDto(title = title))
+        } else {
+            _uiState.value.lists.firstOrNull {
+                it.id == id
+            }
+                .takeIf {
+                    it != null
+                }
+                ?.let {
+                    val result = taskScreenService.upsertTaskList(it.copy(title = title))
+                    refreshLists()
+
+                    return@let result
+                } ?: -1
+        }
     }
 
     suspend fun handleTaskListDelete(id: Long) {
@@ -45,6 +60,6 @@ class TaskListsScreenViewModel @Inject constructor(
         }
 
         taskScreenService.deleteTaskListById(id)
-        refreshScreen()
+        refreshLists()
     }
 }
