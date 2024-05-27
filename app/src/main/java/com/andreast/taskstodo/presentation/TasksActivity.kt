@@ -16,6 +16,7 @@ import com.andreast.taskstodo.presentation.screens.TaskListsScreen
 import com.andreast.taskstodo.presentation.screens.TaskListsScreenViewModel
 import com.andreast.taskstodo.presentation.theme.TasksToDoTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 
 @AndroidEntryPoint
 class TasksActivity : ComponentActivity() {
@@ -24,6 +25,17 @@ class TasksActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // TODO: Restructure app => From database storage to file storage
+        // TODO: This creates folder inside Android/data/com.andreast.taskstodo/files
+        //  Maybe find a way to create the folder in the same level as Android, DCIM, etc.
+        val externalStorageDir = getExternalFilesDir(null)
+        val newDir = File(externalStorageDir, "TasksToDo")
+        val directoryExists = newDir.exists()
+        if (!directoryExists) {
+            newDir.mkdir()
+        }
+
         setContent {
             TasksToDoTheme {
                 _navController = rememberNavController()
